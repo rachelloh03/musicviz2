@@ -3,43 +3,34 @@ import { useEffect, useRef, useState } from "react";
 import { PerspectiveTransform } from "react-perspective-transform";
 import { lightKey } from "./keyActions/lightKey";
 import { unlightKey } from "./keyActions/unlightKey";
+import { Deque } from "@datastructures-js/deque";
 import { FutureNotes } from "./FutureNotes/FutureNotes";
-
-const getTime = () => {
-  return Date.now();
-};
 
 export default function App() {
   const canvasRef = useRef(null);
   // const [futureNotes, setFutureNotes] = useState([]);
-  const [curTime, setCurTime] = useState(getTime());
+  const curTimeRef = useRef(Date.now());
+  // const futureNotesQ = new Deque();
 
-  // useEffect(() => {
-  //   let animId;
-  //   const updateTime = () => {
-  //     const newTime = getTime();
-  //     setCurTime(newTime);
-  //     animId = requestAnimationFrame(updateTime);
-  //   };
-  //   updateTime();
-  //   return () => cancelAnimationFrame(animId);
-  // }, [curTime, setCurTime]);
+  useEffect(() => {
+    let animId;
+    const canvas = canvasRef.current;
+    canvas.width = 400;
+    canvas.height = 300;
+    const ctx = canvas.getContext("2d");
+    const animate = () => {
+      curTimeRef.current = Date.now();
+      // light keys
+      if (!ctx || !canvas) {
+        return;
+      }
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  // useEffect(() => {
-  //   const canvas = canvasRef.current;
-  //   const animate = () => {
-  //     if (canvas) {
-  //       const ctx = canvas.getContext("2d");
-  //       canvas.width = 400;
-  //       canvas.height = 300;
-  //       if (!ctx) {
-  //         return;
-  //       }
-  //       ctx.clearRect(0,0,canvas.width, canvas.height);
-
-  //     }
-  //   }
-  // }, [])
+      animId = requestAnimationFrame(animate);
+    };
+    animate();
+    return () => cancelAnimationFrame(animId);
+  }, []);
 
   const handleMIDIMessage = (color) => (event) => {
     const [status, midi, velocity] = event.data;
@@ -82,7 +73,7 @@ export default function App() {
 
   return (
     <div style={{ width: 400, height: 300, border: "1px solid #ccc" }}>
-      <FutureNotes canvasRef={canvasRef} currTime={curTime} />
+      {/* <FutureNotes canvasRef={canvasRef} currTime={curTimeRef} /> */}
       <PerspectiveTransform>
         <img src="/keyboard.JPG" alt="keyboard" style={{ width: "100%" }} />
         <canvas
