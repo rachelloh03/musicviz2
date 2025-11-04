@@ -2,7 +2,7 @@ import "./App.css";
 import { useEffect, useRef } from "react";
 import { PerspectiveTransform } from "react-perspective-transform";
 import { lightKey } from "./keyActions/lightKey";
-import { unlightKey } from "./keyActions/unlightKey";
+// import { unlightKey } from "./keyActions/unlightKey";
 import { useFutureNotes } from "./FutureNotesProvider/useFutureNotes";
 import { TIME_THRESH, getAlpha } from "./constants";
 

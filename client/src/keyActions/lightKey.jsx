@@ -7,6 +7,7 @@ import {
   blackKeyY,
   whiteKeyY,
   getX,
+  NUM_POINTS,
 } from "./constants";
 
 export const lightKey = (canvas, midi, rgba) => {
@@ -23,19 +24,30 @@ export const lightKey = (canvas, midi, rgba) => {
   ctx.strokeStyle = rgba;
   ctx.fillStyle = rgba;
 
-  // ctx.strokeStyle = color;
-  // ctx.fillStyle = color;
-
-  // if (color == "red") {
-  //   ctx.strokeStyle = `rgba(255,0,0,${alpha})`;
-  //   ctx.fillStyle = `rgba(255,0,0,${alpha})`;
-  // }
+  // simple rectangle
+  // const width = isBlackKey ? blackKeyWidth : whiteKeyWidth;
+  // const height = isBlackKey ? blackKeyHeight : whiteKeyHeight;
+  // const y = isBlackKey ? blackKeyY : whiteKeyY;
+  // ctx.beginPath();
+  // ctx.rect(getX(canvas, midi, isBlackKey), y, width, height);
+  // ctx.fill();
+  // ctx.restore();
 
   const width = isBlackKey ? blackKeyWidth : whiteKeyWidth;
   const height = isBlackKey ? blackKeyHeight : whiteKeyHeight;
   const y = isBlackKey ? blackKeyY : whiteKeyY;
-  ctx.beginPath();
-  ctx.rect(getX(canvas, midi, isBlackKey), y, width, height);
-  ctx.fill();
+  const x = getX(canvas, midi, isBlackKey);
+
+  ctx.fillStyle = rgba;
+
+  // point cloud
+  for (let i = 0; i < NUM_POINTS; i++) {
+    const px = x + Math.random() * width;
+    const py = y + Math.random() * height;
+
+    ctx.beginPath();
+    ctx.arc(px, py, 1.8, 0, Math.PI * 2);
+    ctx.fill();
+  }
   ctx.restore();
 };

@@ -48,3 +48,5 @@ export function getX(canvas, midi, isBlackKey) {
   }
   return canvas.width - x;
 }
+
+export const NUM_POINTS = 150;
