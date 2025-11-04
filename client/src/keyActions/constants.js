@@ -48,5 +48,3 @@ export function getX(canvas, midi, isBlackKey) {
   }
   return canvas.width - x;
 }
-
-// export function getAlpha()

@@ -9,7 +9,7 @@ import {
   getX,
 } from "./constants";
 
-export const lightKey = (canvas, midi, color, alpha = 0.5) => {
+export const lightKey = (canvas, midi, rgba) => {
   if (!canvas) {
     return;
   }
@@ -20,13 +20,16 @@ export const lightKey = (canvas, midi, color, alpha = 0.5) => {
 
   const isBlackKey = blackKeys.includes(midi);
 
-  ctx.strokeStyle = color;
-  ctx.fillStyle = color;
+  ctx.strokeStyle = rgba;
+  ctx.fillStyle = rgba;
 
-  if (color == "red") {
-    ctx.strokeStyle = `rgba(255,0,0,${alpha})`;
-    ctx.fillStyle = `rgba(255,0,0,${alpha})`;
-  }
+  // ctx.strokeStyle = color;
+  // ctx.fillStyle = color;
+
+  // if (color == "red") {
+  //   ctx.strokeStyle = `rgba(255,0,0,${alpha})`;
+  //   ctx.fillStyle = `rgba(255,0,0,${alpha})`;
+  // }
 
   const width = isBlackKey ? blackKeyWidth : whiteKeyWidth;
   const height = isBlackKey ? blackKeyHeight : whiteKeyHeight;

@@ -4,6 +4,7 @@ import { PerspectiveTransform } from "react-perspective-transform";
 import { lightKey } from "./keyActions/lightKey";
 import { unlightKey } from "./keyActions/unlightKey";
 import { useFutureNotes } from "./FutureNotesProvider/useFutureNotes";
+import { TIME_THRESH, getAlpha } from "./constants";
 
 export default function App() {
   const canvasRef = useRef(null);
@@ -25,11 +26,14 @@ export default function App() {
 
       qRef.current.forEach((token) => {
         if (
-          token.time <= curTimeRef.current &&
+          token.time - TIME_THRESH <= curTimeRef.current &&
           curTimeRef.current <= token.time + token.duration
         ) {
-          lightKey(canvasRef.current, token.note, "green");
-          console.log("light key", token.note);
+          lightKey(
+            canvasRef.current,
+            token.note,
+            `rgba(19,127,189,${getAlpha(curTimeRef.current, token.time)})` // blue
+          );
         }
       });
 
@@ -44,44 +48,47 @@ export default function App() {
     //eslint-disable-next-line
   }, []);
 
-  const handleMIDIMessage = (color) => (event) => {
-    const [status, midi, velocity] = event.data;
-    if (status === 144 && velocity > 0) {
-      // note on
-      lightKey(canvasRef.current, midi, color);
-    } else if ((status == 144 && velocity == 0) || status == 128) {
-      // note off
-      unlightKey(canvasRef.current, midi);
-    }
-  };
+  // const handleMIDIMessage = (color) => (event) => {
+  //   const [status, midi, velocity] = event.data;
+  //   if (status === 144 && velocity > 0) {
+  //     lightKey(canvasRef.current, midi, color);
+  //   }
+  //   // else if ((status == 144 && velocity == 0) || status == 128) {
+  //   //   // note off
+  //   //   unlightKey(canvasRef.current, midi);
+  //   // }
+  // };
 
-  useEffect(() => {
-    let midiAccess;
+  // useEffect(() => {
+  //   let midiAccess;
 
-    navigator
-      .requestMIDIAccess()
-      .then((access) => {
-        midiAccess = access;
-        for (const input of midiAccess.inputs.values()) {
-          if (input.name === "GarageBand Virtual Out") {
-            continue;
-          }
-          const color = input.name === "Piaggero" ? "purple" : "red";
-          // human played notes are purple, jambot notes are red
-          input.onmidimessage = handleMIDIMessage(color);
-        }
-      })
-      .catch((err) => console.error("MIDI not supported", err));
+  //   navigator
+  //     .requestMIDIAccess()
+  //     .then((access) => {
+  //       midiAccess = access;
+  //       for (const input of midiAccess.inputs.values()) {
+  //         if (input.name === "GarageBand Virtual Out") {
+  //           continue;
+  //         }
+  //         const color =
+  //           input.name === "Piaggero"
+  //             ? "rgba(109, 0, 225, 1)"
+  //             : "rgba(239, 17, 17, 1)";
+  //         // human played notes are purple, jambot notes are red
+  //         input.onmidimessage = handleMIDIMessage(color);
+  //       }
+  //     })
+  //     .catch((err) => console.error("MIDI not supported", err));
 
-    return () => {
-      // Cleanup MIDI listeners
-      if (midiAccess) {
-        for (const input of midiAccess.inputs.values()) {
-          input.onmidimessage = null;
-        }
-      }
-    };
-  }, []);
+  //   return () => {
+  //     // Cleanup MIDI listeners
+  //     if (midiAccess) {
+  //       for (const input of midiAccess.inputs.values()) {
+  //         input.onmidimessage = null;
+  //       }
+  //     }
+  //   };
+  // }, []);
 
   return (
     <div style={{ width: 400, height: 300, border: "1px solid #ccc" }}>
