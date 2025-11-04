@@ -10,6 +10,9 @@ import {
 } from "./constants";
 
 export const lightKey = (canvas, midi, color, alpha = 0.5) => {
+  if (!canvas) {
+    return;
+  }
   const ctx = canvas.getContext("2d");
   if (!ctx) {
     return;
