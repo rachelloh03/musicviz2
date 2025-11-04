@@ -17,32 +17,34 @@ export const FutureNotesProvider = ({ children }) => {
     ws.onmessage = (event) => {
       // runs whenever a new message is received
       const msg = JSON.parse(event.data);
-      const value = msg.args[0].value;
-      const arr = new Uint8Array(Object.values(value));
-      const dataView = new DataView(arr.buffer);
-      let time;
-      let msgId;
-      if (msg.address === "/time") {
-        time = dataView.getUint32(0, true);
-        msgId = `${msg.address}-${time}`;
-      } else if (msg.address === "/token") {
-        time = dataView.getUint32(0, true);
-        const note = dataView.getUint8(7);
-        msgId = `${msg.address}-${time}-${note}`;
-      }
-      if (!recentMsgsRef.current.has(msgId)) {
-        recentMsgsRef.current.add(msgId);
+      if (msg) {
+        const value = msg.args[0].value;
+        const arr = new Uint8Array(Object.values(value));
+        const dataView = new DataView(arr.buffer);
+        let time;
+        let msgId;
         if (msg.address === "/time") {
-          curTimeRef.current = time;
-          // console.log("q before clear:", [...qRef.current]);
-          // qRef.current.length = 0;
-          // console.log("time:", curTimeRef.current);
+          time = dataView.getUint32(0, true);
+          msgId = `${msg.address}-${time}`;
         } else if (msg.address === "/token") {
-          const duration = dataView.getUint16(4, true);
-          const instrument = dataView.getUint8(6);
+          time = dataView.getUint32(0, true);
           const note = dataView.getUint8(7);
-          const parsedToken = { time, duration, instrument, note };
-          qRef.current.push(parsedToken);
+          msgId = `${msg.address}-${time}-${note}`;
+        }
+        if (!recentMsgsRef.current.has(msgId)) {
+          recentMsgsRef.current.add(msgId);
+          if (msg.address === "/time") {
+            curTimeRef.current = time;
+            // console.log("q before clear:", [...qRef.current]);
+            // qRef.current.length = 0;
+            // console.log("time:", curTimeRef.current);
+          } else if (msg.address === "/token") {
+            const duration = dataView.getUint16(4, true);
+            const instrument = dataView.getUint8(6);
+            const note = dataView.getUint8(7);
+            const parsedToken = { time, duration, instrument, note };
+            qRef.current.push(parsedToken);
+          }
         }
       }
 

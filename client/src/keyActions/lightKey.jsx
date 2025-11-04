@@ -25,29 +25,29 @@ export const lightKey = (canvas, midi, rgba) => {
   ctx.fillStyle = rgba;
 
   // simple rectangle
-  // const width = isBlackKey ? blackKeyWidth : whiteKeyWidth;
-  // const height = isBlackKey ? blackKeyHeight : whiteKeyHeight;
-  // const y = isBlackKey ? blackKeyY : whiteKeyY;
-  // ctx.beginPath();
-  // ctx.rect(getX(canvas, midi, isBlackKey), y, width, height);
-  // ctx.fill();
-  // ctx.restore();
-
   const width = isBlackKey ? blackKeyWidth : whiteKeyWidth;
   const height = isBlackKey ? blackKeyHeight : whiteKeyHeight;
   const y = isBlackKey ? blackKeyY : whiteKeyY;
-  const x = getX(canvas, midi, isBlackKey);
+  ctx.beginPath();
+  ctx.rect(getX(canvas, midi, isBlackKey), y, width, height);
+  ctx.fill();
+  ctx.restore();
 
-  ctx.fillStyle = rgba;
+  // const width = isBlackKey ? blackKeyWidth : whiteKeyWidth;
+  // const height = isBlackKey ? blackKeyHeight : whiteKeyHeight;
+  // const y = isBlackKey ? blackKeyY : whiteKeyY;
+  // const x = getX(canvas, midi, isBlackKey);
 
-  // point cloud
-  for (let i = 0; i < NUM_POINTS; i++) {
-    const px = x + Math.random() * width;
-    const py = y + Math.random() * height;
+  // ctx.fillStyle = rgba;
 
-    ctx.beginPath();
-    ctx.arc(px, py, 1.8, 0, Math.PI * 2);
-    ctx.fill();
-  }
+  // // point cloud
+  // for (let i = 0; i < NUM_POINTS; i++) {
+  //   const px = x + Math.random() * width;
+  //   const py = y + Math.random() * height;
+
+  //   ctx.beginPath();
+  //   ctx.arc(px, py, 1.8, 0, Math.PI * 2);
+  //   ctx.fill();
+  // }
   ctx.restore();
 };
