@@ -32,7 +32,7 @@ export default function App() {
           lightKey(
             canvasRef.current,
             token.note,
-            `rgba(19,127,189,${getAlpha(curTimeRef.current, token.time)})` // blue
+            `rgba(50,50,50,${getAlpha(curTimeRef.current, token.time)})`
           );
         }
       });

@@ -19,7 +19,7 @@ export const whiteKeys = Array.from({ length: 128 }, (_, i) => i).filter(
   (num) => !blackKeys.includes(num)
 );
 
-export const blackKeyWidth = 7;
+export const blackKeyWidth = 9; //7
 export const whiteKeyWidth = 11; //11
 export const blackKeyHeight = 150;
 export const whiteKeyHeight = 227;
