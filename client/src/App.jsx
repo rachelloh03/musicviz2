@@ -3,14 +3,13 @@ import { useEffect, useRef, useState } from "react";
 import { PerspectiveTransform } from "react-perspective-transform";
 import { lightKey } from "./keyActions/lightKey";
 import { unlightKey } from "./keyActions/unlightKey";
-import { Deque } from "@datastructures-js/deque";
-import { FutureNotes } from "./FutureNotes/FutureNotes";
+import { useFutureNotes } from "./FutureNotesProvider/useFutureNotes";
 
 export default function App() {
   const canvasRef = useRef(null);
-  // const [futureNotes, setFutureNotes] = useState([]);
   const curTimeRef = useRef(Date.now());
-  // const futureNotesQ = new Deque();
+  const { q, clearQ, removeOldNotes } = useFutureNotes();
+  const [startTime, setStartTime] = useState(null);
 
   useEffect(() => {
     let animId;
@@ -19,18 +18,39 @@ export default function App() {
     canvas.height = 300;
     const ctx = canvas.getContext("2d");
     const animate = () => {
-      curTimeRef.current = Date.now();
       // light keys
-      if (!ctx || !canvas) {
+      if (!ctx || !canvas || !startTime || !q.length) {
+        animId = requestAnimationFrame(animate);
         return;
       }
+      curTimeRef.current = (Date.now() - startTime) / 10; // convert from ms to centiseconds
       ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // removeOldNotes(curTimeRef.current);
+      // q.forEach((token) => {
+      //   console.log(
+      //     "token.time: ",
+      //     token.time,
+      //     " and curTime: ",
+      //     curTimeRef.current,
+      //     " and finaltime: ",
+      //     token.time + token.duration
+      //   );
+      //   if (
+      //     token.time <= curTimeRef.current &&
+      //     curTimeRef.current <= token.time + token.duration
+      //   ) {
+      //     lightKey(canvasRef.current, token.note, "green");
+      //     console.log("light key", token.note);
+      //   }
+      // });
 
       animId = requestAnimationFrame(animate);
     };
     animate();
     return () => cancelAnimationFrame(animId);
-  }, []);
+    //eslint-disable-next-line
+  }, [startTime]);
 
   const handleMIDIMessage = (color) => (event) => {
     const [status, midi, velocity] = event.data;
@@ -71,9 +91,23 @@ export default function App() {
     };
   }, []);
 
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      if (event.repeat) return;
+      console.log(event.key);
+      if (event.key == "Enter") {
+        // clearQ();
+        setStartTime(Date.now());
+      }
+    };
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, []);
+
   return (
     <div style={{ width: 400, height: 300, border: "1px solid #ccc" }}>
-      {/* <FutureNotes canvasRef={canvasRef} currTime={curTimeRef} /> */}
       <PerspectiveTransform>
         <img src="/keyboard.JPG" alt="keyboard" style={{ width: "100%" }} />
         <canvas

@@ -1,7 +1,8 @@
-import { useEffect } from "react";
+import { useEffect, useState, useCallback } from "react";
+import { FutureNotesContext } from "./FutureNotesContext";
 
-export const FutureNotes = ({ canvasRef, curTimeRef, q }) => {
-  const futureThresh = 300; // 300 ms into future
+export const FutureNotesProvider = ({ children }) => {
+  const [q, setQ] = useState([]);
 
   useEffect(() => {
     const ws = new WebSocket("ws://localhost:8081"); // browser client connects to ws server on 8081
@@ -26,7 +27,9 @@ export const FutureNotes = ({ canvasRef, curTimeRef, q }) => {
         if (note === 129) console.log("BarSeparator");
         if (note === 130) console.log("ClearQueue");
 
-        q.push(parsedToken);
+        setQ((prevQ) => {
+          return [...prevQ, parsedToken];
+        });
       }
     };
 
@@ -39,7 +42,23 @@ export const FutureNotes = ({ canvasRef, curTimeRef, q }) => {
     };
 
     return () => ws.close();
-  }, [q]); // runs once on mount to connect to websocket server
+  }, []); // runs once on mount to connect to websocket server
 
-  return null;
+  const clearQ = useCallback(() => {
+    setQ([]);
+  }, []);
+
+  const removeOldNotes = useCallback((curTime) => {
+    setQ((prevQ) => {
+      return prevQ
+        .toArray()
+        .filter((token) => token.time + token.duration < curTime);
+    });
+  }, []);
+
+  return (
+    <FutureNotesContext.Provider value={{ q, clearQ, removeOldNotes }}>
+      {children}
+    </FutureNotesContext.Provider>
+  );
 };
