@@ -1,11 +1,9 @@
 import { useEffect, useRef } from "react";
 import { FutureNotesContext } from "./FutureNotesContext";
-import { MAX_RECENT_MSGS } from "./constants";
 
 export const FutureNotesProvider = ({ children }) => {
   let qRef = useRef([]);
-  let recentMsgsRef = useRef(new Set());
-  const curTimeRef = useRef(0);
+  const curTimeRef = useRef(null);
 
   useEffect(() => {
     const ws = new WebSocket("ws://localhost:8081"); // browser client connects to ws server on 8081
@@ -21,38 +19,23 @@ export const FutureNotesProvider = ({ children }) => {
         const value = msg.args[0].value;
         const arr = new Uint8Array(Object.values(value));
         const dataView = new DataView(arr.buffer);
-        let time;
-        let msgId;
         if (msg.address === "/time") {
-          time = dataView.getUint32(0, true);
-          msgId = `${msg.address}-${time}`;
+          curTimeRef.current = dataView.getUint32(0, true);
         } else if (msg.address === "/token") {
-          time = dataView.getUint32(0, true);
+          const time = dataView.getUint32(0, true);
+          const duration = dataView.getUint16(4, true);
+          const instrument = dataView.getUint8(6);
           const note = dataView.getUint8(7);
-          msgId = `${msg.address}-${time}-${note}`;
-        }
-        if (!recentMsgsRef.current.has(msgId)) {
-          recentMsgsRef.current.add(msgId);
-          if (msg.address === "/time") {
-            curTimeRef.current = time;
-          } else if (msg.address === "/token") {
-            const duration = dataView.getUint16(4, true);
-            const instrument = dataView.getUint8(6);
-            const note = dataView.getUint8(7);
-            if (note === 130) {
-              // 130 is ClearQueue
-              qRef.current = [];
-            } else if (note !== 129) {
-              // 129 is BarSeparator
-              const parsedToken = { time, duration, instrument, note };
-              qRef.current.push(parsedToken);
-            }
+
+          if (note === 130) {
+            // 130 is ClearQueue
+            qRef.current = [];
+          } else if (note !== 129) {
+            // 129 is BarSeparator
+            const parsedToken = { time, duration, instrument, note };
+            qRef.current.push(parsedToken);
           }
         }
-      }
-
-      if (recentMsgsRef.current.size > MAX_RECENT_MSGS) {
-        recentMsgsRef.current.clear();
       }
     };
 

@@ -2,13 +2,13 @@ import "./App.css";
 import { useEffect, useRef } from "react";
 import { PerspectiveTransform } from "react-perspective-transform";
 import { lightKey } from "./keyActions/lightKey";
-// import { unlightKey } from "./keyActions/unlightKey";
 import { useFutureNotes } from "./FutureNotesProvider/useFutureNotes";
 import { TIME_THRESH, getAlpha, MAX_FUTURE_NOTES } from "./constants";
 
 export default function App() {
   const canvasRef = useRef(null);
   const { qRef, curTimeRef } = useFutureNotes();
+  const realTimeRef = useRef(null);
 
   useEffect(() => {
     let animId;
@@ -18,12 +18,11 @@ export default function App() {
     const ctx = canvas.getContext("2d");
     const animate = () => {
       // light keys
-      if (!ctx || !canvas) {
+      if (!ctx || !canvas || curTimeRef.current === null) {
         animId = requestAnimationFrame(animate);
         return;
       }
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-
       qRef.current.forEach((token) => {
         if (
           token.time - TIME_THRESH <= curTimeRef.current &&
@@ -56,49 +55,6 @@ export default function App() {
     return () => cancelAnimationFrame(animId);
     //eslint-disable-next-line
   }, []);
-
-  // const handleMIDIMessage = (color) => (event) => {
-  //   const [status, midi, velocity] = event.data;
-  //   if (status === 144 && velocity > 0) {
-  //     activeNotesRef.current.push({ midi, color });
-  //     // lightKey(canvasRef.current, midi, color);
-  //   } else if ((status == 144 && velocity == 0) || status == 128) {
-  //     activeNotesRef.current = activeNotesRef.current.filter(
-  //       (note) => note.midi !== midi
-  //     );
-  //   }
-  // };
-
-  // useEffect(() => {
-  //   let midiAccess;
-
-  //   navigator
-  //     .requestMIDIAccess()
-  //     .then((access) => {
-  //       midiAccess = access;
-  //       for (const input of midiAccess.inputs.values()) {
-  //         if (input.name === "GarageBand Virtual Out") {
-  //           continue;
-  //         }
-  //         const color =
-  //           input.name === "Piaggero"
-  //             ? "rgba(0, 131, 225, 1)"
-  //             : "rgba(239, 17, 17, 1)";
-  //         // human played notes are purple, jambot notes are red
-  //         input.onmidimessage = handleMIDIMessage(color);
-  //       }
-  //     })
-  //     .catch((err) => console.error("MIDI not supported", err));
-
-  //   return () => {
-  //     // Cleanup MIDI listeners
-  //     if (midiAccess) {
-  //       for (const input of midiAccess.inputs.values()) {
-  //         input.onmidimessage = null;
-  //       }
-  //     }
-  //   };
-  // }, []);
 
   return (
     <div style={{ width: 400, height: 300, border: "1px solid #ccc" }}>
