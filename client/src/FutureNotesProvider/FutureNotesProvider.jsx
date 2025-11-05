@@ -35,15 +35,18 @@ export const FutureNotesProvider = ({ children }) => {
           recentMsgsRef.current.add(msgId);
           if (msg.address === "/time") {
             curTimeRef.current = time;
-            // console.log("q before clear:", [...qRef.current]);
-            // qRef.current.length = 0;
-            // console.log("time:", curTimeRef.current);
           } else if (msg.address === "/token") {
             const duration = dataView.getUint16(4, true);
             const instrument = dataView.getUint8(6);
             const note = dataView.getUint8(7);
-            const parsedToken = { time, duration, instrument, note };
-            qRef.current.push(parsedToken);
+            if (note === 130) {
+              // 130 is ClearQueue
+              qRef.current = [];
+            } else if (note !== 129) {
+              // 129 is BarSeparator
+              const parsedToken = { time, duration, instrument, note };
+              qRef.current.push(parsedToken);
+            }
           }
         }
       }

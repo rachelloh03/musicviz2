@@ -2,14 +2,13 @@ import "./App.css";
 import { useEffect, useRef } from "react";
 import { PerspectiveTransform } from "react-perspective-transform";
 import { lightKey } from "./keyActions/lightKey";
-import { unlightKey } from "./keyActions/unlightKey";
+// import { unlightKey } from "./keyActions/unlightKey";
 import { useFutureNotes } from "./FutureNotesProvider/useFutureNotes";
-import { TIME_THRESH, getAlpha } from "./constants";
+import { TIME_THRESH, getAlpha, MAX_FUTURE_NOTES } from "./constants";
 
 export default function App() {
   const canvasRef = useRef(null);
   const { qRef, curTimeRef } = useFutureNotes();
-  // const activeNotesRef = useRef([]);
 
   useEffect(() => {
     let animId;
@@ -29,7 +28,6 @@ export default function App() {
         if (
           token.time - TIME_THRESH <= curTimeRef.current &&
           curTimeRef.current < token.time
-          // curTimeRef.current <= token.time + token.duration
         ) {
           lightKey(
             canvasRef.current,
@@ -44,13 +42,13 @@ export default function App() {
         }
       });
 
-      // activeNotesRef.current.forEach(({ midi, color }) => {
-      //   lightKey(canvasRef.current, midi, color);
-      // });
-
       qRef.current = qRef.current.filter(
         (token) => curTimeRef.current < token.time + token.duration
       );
+
+      if (qRef.current.length > MAX_FUTURE_NOTES) {
+        qRef.current.splice(0, qRef.current.length - MAX_FUTURE_NOTES);
+      }
 
       animId = requestAnimationFrame(animate);
     };
