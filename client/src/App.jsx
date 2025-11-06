@@ -8,7 +8,6 @@ import { TIME_THRESH, getAlpha, MAX_FUTURE_NOTES } from "./constants";
 export default function App() {
   const canvasRef = useRef(null);
   const { qRef, curTimeRef } = useFutureNotes();
-  const realTimeRef = useRef(null);
 
   useEffect(() => {
     let animId;
