@@ -1,3 +1,9 @@
+import {
+  blackKeyHeight,
+  whiteKeyHeight,
+  blackKeys,
+} from "../src/keyActions/constants";
+
 export const TIME_THRESH = 100;
 export const MAX_DENSITY = 20;
 
@@ -28,4 +34,12 @@ export function getColor(qRef, curTime, startTime) {
   const g = 0;
   const b = parseInt((1 - onsetDensityNorm) * 255);
   return `rgba(${r}, ${g}, ${b},${getAlpha(curTime, startTime)})`;
+}
+
+export function getHeight(curTime, startTime, midi) {
+  const isBlackKey = blackKeys.includes(midi);
+  const keyHeight = isBlackKey ? blackKeyHeight : whiteKeyHeight;
+
+  const t = (curTime - (startTime - TIME_THRESH)) / TIME_THRESH;
+  return keyHeight * Math.min(t, 1); // linear height, clip at full height
 }

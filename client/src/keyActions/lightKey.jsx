@@ -1,9 +1,7 @@
 import {
   blackKeys,
   blackKeyWidth,
-  blackKeyHeight,
   whiteKeyWidth,
-  whiteKeyHeight,
   blackKeyY,
   whiteKeyY,
   getX,
@@ -13,6 +11,7 @@ export const lightKey = (
   canvas,
   midi,
   rgba,
+  height,
   isPointCloud = false,
   numPoints = 150
 ) => {
@@ -30,7 +29,6 @@ export const lightKey = (
   ctx.fillStyle = rgba;
 
   const width = isBlackKey ? blackKeyWidth : whiteKeyWidth;
-  const height = isBlackKey ? blackKeyHeight : whiteKeyHeight;
   const y = isBlackKey ? blackKeyY : whiteKeyY;
   const x = getX(canvas, midi, isBlackKey);
 

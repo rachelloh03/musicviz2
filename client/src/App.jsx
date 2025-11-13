@@ -3,7 +3,12 @@ import { useEffect, useRef } from "react";
 import { PerspectiveTransform } from "react-perspective-transform";
 import { lightKey } from "./keyActions/lightKey";
 import { useFutureNotes } from "./FutureNotesProvider/useFutureNotes";
-import { TIME_THRESH, MAX_FUTURE_NOTES, getColor } from "./constants";
+import {
+  TIME_THRESH,
+  MAX_FUTURE_NOTES,
+  getColor,
+  getHeight,
+} from "./constants";
 
 export default function App() {
   const canvasRef = useRef(null);
@@ -30,7 +35,8 @@ export default function App() {
           lightKey(
             canvasRef.current,
             token.note,
-            getColor(qRef, curTimeRef.current, token.time)
+            getColor(qRef, curTimeRef.current, token.time),
+            getHeight(curTimeRef.current, token.time, token.note)
           );
         }
       });
