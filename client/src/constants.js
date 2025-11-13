@@ -33,6 +33,7 @@ export function getColor(qRef, curTime, startTime) {
   const r = parseInt(onsetDensityNorm * 255);
   const g = 0;
   const b = parseInt((1 - onsetDensityNorm) * 255);
+  console.log("onsetDensityNorm:", onsetDensityNorm);
   return `rgba(${r}, ${g}, ${b},${getAlpha(curTime, startTime)})`;
 }
 
@@ -43,3 +44,8 @@ export function getHeight(curTime, startTime, midi) {
   const t = (curTime - (startTime - TIME_THRESH)) / TIME_THRESH;
   return keyHeight * Math.min(t, 1); // linear height, clip at full height
 }
+
+// ashley work here
+// export function getRepetition(qRef, curTime) {
+//   console.log("repeition:");
+// }
