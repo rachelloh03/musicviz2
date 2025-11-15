@@ -94,7 +94,7 @@ export function getHeight(curTime, startTime, isBlackKey) {
 }
 
 export function getWidth(curTime, startTime, isBlackKey) {
-  if (curTime < startTime) {
+  if (curTime <= startTime) {
     return isBlackKey ? blackKeyWidth : whiteKeyWidth;
   } else {
     return playingNoteWidth;
