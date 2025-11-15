@@ -1,20 +1,14 @@
 import {
   blackKeys,
-  blackKeyWidth,
-  whiteKeyWidth,
   blackKeyY,
   whiteKeyY,
   getX,
+  getColor,
+  getHeight,
+  getWidth,
 } from "./constants";
 
-export const lightKey = (
-  canvas,
-  midi,
-  rgba,
-  height,
-  isPointCloud = false,
-  numPoints = 150
-) => {
+export const lightKey = (canvas, midi, qRef, curTime, startTime) => {
   if (!canvas) {
     return;
   }
@@ -25,30 +19,19 @@ export const lightKey = (
 
   const isBlackKey = blackKeys.includes(midi);
 
+  const rgba = getColor(qRef, curTime, startTime);
+  const height = getHeight(curTime, startTime, isBlackKey);
+  const width = getWidth(curTime, startTime, isBlackKey);
+
   ctx.strokeStyle = rgba;
   ctx.fillStyle = rgba;
 
-  const width = isBlackKey ? blackKeyWidth : whiteKeyWidth;
   const y = isBlackKey ? blackKeyY : whiteKeyY;
-  const x = getX(canvas, midi, isBlackKey);
+  const x = getX(canvas, midi, isBlackKey, curTime, startTime);
 
-  // point cloud
-  if (isPointCloud) {
-    for (let i = 0; i < numPoints; i++) {
-      const px = x + Math.random() * width;
-      const py = y + Math.random() * height;
-
-      ctx.beginPath();
-      ctx.arc(px, py, 1.8, 0, Math.PI * 2);
-      ctx.fill();
-    }
-  } else {
-    // simple rectangle
-    ctx.beginPath();
-    ctx.rect(x, y, width, height);
-    ctx.fill();
-    ctx.restore();
-  }
-
+  // simple rectangle
+  ctx.beginPath();
+  ctx.rect(x, y, width, height);
+  ctx.fill();
   ctx.restore();
 };
