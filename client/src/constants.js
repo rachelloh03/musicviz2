@@ -42,7 +42,7 @@ export function getHeight(curTime, startTime, midi) {
   const keyHeight = isBlackKey ? blackKeyHeight : whiteKeyHeight;
 
   const t = (curTime - (startTime - TIME_THRESH)) / TIME_THRESH;
-  return keyHeight * Math.min(t, 1); // linear height, clip at full height
+  return -keyHeight * Math.min(t, 1); // linear height, clip at full height
 }
 
 // ashley work here

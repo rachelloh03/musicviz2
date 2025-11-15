@@ -21,11 +21,11 @@ export const whiteKeys = Array.from({ length: 128 }, (_, i) => i).filter(
 
 export const blackKeyWidth = 7;
 export const whiteKeyWidth = 11; //11
-export const blackKeyHeight = 150;
-export const whiteKeyHeight = 227;
+export const blackKeyHeight = 155;
+export const whiteKeyHeight = 235;
 
-export const blackKeyY = 100;
-export const whiteKeyY = 20;
+export const blackKeyY = 258;
+export const whiteKeyY = 258;
 export const xOffset = -216;
 
 export function getWhiteX(midi) {
