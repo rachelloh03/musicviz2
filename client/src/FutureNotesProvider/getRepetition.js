@@ -1,14 +1,21 @@
-export const MAX_FUTURE_NOTES = 100;
-export const TIME_THRESH = 100;
-
 export function getRepetition(qRef, curTime) {
+  // console.log(qRef.current);
+  
+  
   const notes = qRef.current;
   if (!notes || notes.length < 2) return false;
+  // console.log("Raw notes:", notes.map(n => ({
+  //   time: n.time,
+  //   note: n.note,
+  //   duration: n.duration
+  // })));
 
+  // Extract arrays like Python
   const onsets = notes.map(n => n.time);
   const pitches = notes.map(n => n.note);
   const durations = notes.map(n => n.duration);
 
+  // ---- GROUPING ONSETS INTO CHORD-SETS ----
   let prev_onset = null;
   let onset_groupings = [];
   let current_group = new Set();
@@ -19,16 +26,17 @@ export function getRepetition(qRef, curTime) {
       prev_onset = onset;
     }
 
-    if (onset - prev_onset <= 1) {
+    if (prev_onset === null || onset - prev_onset <= 1) {
       current_group.add(pitches[i]);
     } else {
       onset_groupings.push(current_group);
       current_group = new Set([pitches[i]]);
-      prev_onset = onset;
     }
+    prev_onset = onset; 
   }
   if (current_group.size > 0) onset_groupings.push(current_group);
 
+  // ---- PARAMETERS LIKE PYTHON ----
   const num_groupings = onset_groupings.length;
   const min_onset = Math.min(...onsets);
   const max_onset = Math.max(...onsets);
@@ -44,17 +52,28 @@ export function getRepetition(qRef, curTime) {
     1,
     Math.min(8, Math.ceil(pitches.length * 0.25))
   );
+  // console.log(max_pattern);
 
   let min_repeats = Math.max(4, Math.round(4 * density));
+  // console.log(min_repeats);
 
+  // ---- HASH chord-sets like Python ----
   const hashed_seq = onset_groupings.map(ch =>
     Array.from(ch).sort((a, b) => a - b).join(",")
   );
 
+  // console.log("onset_groupings:", onset_groupings.map(s => Array.from(s)));
+  // console.log("hashed_seq:", hashed_seq);
+  // console.log("max_pattern:", max_pattern);
+  // console.log("min_repeats:", min_repeats);
+  // console.log("hashed_seq.length:", hashed_seq.length);
+
   let i = 0;
   let repetitions = 0;
 
+  // ---- REPETITION DETECTION ----
   while (i <= hashed_seq.length - 2) {
+    
     let found = false;
 
     for (let L = 1; L <= max_pattern; L++) {
@@ -71,8 +90,9 @@ export function getRepetition(qRef, curTime) {
         if (!arraysEqual(slice, pattern)) break;
         count++;
       }
-
+      
       if (count >= min_repeats) {
+        
         repetitions++;
         i += count * L;
         found = true;
@@ -94,4 +114,3 @@ function arraysEqual(a, b) {
   }
   return true;
 }
-
