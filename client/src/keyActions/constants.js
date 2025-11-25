@@ -71,7 +71,7 @@ export function getAlpha(curTime, startTime) {
 export function getColor(curTime, startTime) {
   const timePercentChange = Math.min(
     1.0,
-    Math.max(0.0, (startTime - curTime) / (TIME_THRESH / 3))
+    Math.max(0.0, (startTime - curTime) / (TIME_THRESH / 2))
   );
   // blue to red --> as curTime gets closer to startTime
   const r = parseInt((1 - timePercentChange) * 255);
