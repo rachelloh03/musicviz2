@@ -43,6 +43,7 @@ export function getWhiteX(midi) {
 export function getX(canvas, midi, isBlackKey, curTime, startTime) {
   // 60 = C4
   let x;
+  const curWidth = getWidth(curTime, startTime, isBlackKey);
   const keyWidth = isBlackKey ? blackKeyWidth : whiteKeyWidth;
   if (!isBlackKey) {
     x = getWhiteX(midi);
@@ -53,7 +54,8 @@ export function getX(canvas, midi, isBlackKey, curTime, startTime) {
   if (curTime < startTime) {
     return canvas.width - x;
   } else {
-    return canvas.width - (x - keyWidth / 2 + playingNoteWidth / 2);
+    const delta = (keyWidth - curWidth) / 2;
+    return canvas.width - (x - delta);
   }
 }
 
@@ -93,10 +95,16 @@ export function getHeight(curTime, startTime, isBlackKey) {
   return -keyHeight * Math.min(t, 1); // linear height, clip at full height
 }
 
+export const SKINNY_TIME = 50;
+
 export function getWidth(curTime, startTime, isBlackKey) {
+  const fullWidth = isBlackKey ? blackKeyWidth : whiteKeyWidth;
   if (curTime <= startTime) {
-    return isBlackKey ? blackKeyWidth : whiteKeyWidth;
-  } else {
+    return fullWidth;
+  } else if (curTime >= startTime + SKINNY_TIME) {
     return playingNoteWidth;
+  } else {
+    const t = (curTime - startTime) / SKINNY_TIME;
+    return fullWidth + t * (playingNoteWidth - fullWidth);
   }
 }
