@@ -3,18 +3,12 @@ import { useEffect, useRef } from "react";
 import { PerspectiveTransform } from "react-perspective-transform";
 import { lightKey } from "./keyActions/lightKey";
 import { useFutureNotes } from "./FutureNotesProvider/useFutureNotes";
-import {
-  TIME_THRESH,
-  MAX_FUTURE_NOTES,
-  COLORS,
-  MAIN_COLOR,
-  getChordKey,
-} from "./constants";
+import { TIME_THRESH, MAX_FUTURE_NOTES } from "./constants";
+import { getColor } from "./keyActions/constants";
 
 export default function App() {
   const canvasRef = useRef(null);
   const { qRef, curTimeRef } = useFutureNotes();
-  const chordColorsRef = useRef(new Map());
 
   useEffect(() => {
     let animId;
@@ -22,7 +16,6 @@ export default function App() {
     canvas.width = 400;
     canvas.height = 300;
     const ctx = canvas.getContext("2d");
-    let colorI = 0;
     const animate = () => {
       if (!ctx || !canvas || curTimeRef.current === null) {
         animId = requestAnimationFrame(animate);
@@ -30,56 +23,18 @@ export default function App() {
       }
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      // group tokens by chords
-      const chords = new Map();
-      qRef.current.forEach((token) => {
-        const chord = getChordKey(token);
-        if (!chords.has(chord)) {
-          chords.set(chord, [token]);
-        } else {
-          chords.get(chord).push(token);
-        }
-      });
-
-      // remove chord colors that are in the past
-      for (const chord of chordColorsRef.current.keys()) {
-        if (!chords.has(chord)) {
-          chordColorsRef.current.delete(chord);
-        }
-      }
-
-      // set each chord to be same color
-      for (const chord of chords.keys()) {
-        if (!chordColorsRef.current.has(chord)) {
-          // single notes will be MAIN_COLOR
-          if (chords.get(chord).length === 1) {
-            chordColorsRef.current.set(chord, MAIN_COLOR);
-          } else {
-            chordColorsRef.current.set(chord, COLORS[colorI % COLORS.length]);
-            colorI += 1;
-          }
-        } else if (
-          chords.get(chord).length > 1 &&
-          chordColorsRef.current.get(chord) === MAIN_COLOR
-        ) {
-          chordColorsRef.current.set(chord, COLORS[colorI % COLORS.length]);
-          colorI += 1;
-        }
-      }
-
       // light keys
       qRef.current.forEach((token) => {
         if (
           token.time - TIME_THRESH <= curTimeRef.current &&
           curTimeRef.current <= token.time + token.duration
         ) {
-          const chord = getChordKey(token);
           lightKey(
             canvasRef.current,
             token.note,
             curTimeRef.current,
             token.time,
-            chordColorsRef.current.get(chord)
+            getColor(curTimeRef.current, token.time)
           );
         }
       });

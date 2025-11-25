@@ -68,23 +68,16 @@ export function getAlpha(curTime, startTime) {
   ); // linear alpha, clip at 1.0
 }
 
-export function getColor(qRef, curTime, startTime) {
-  const uniqueOnsets = new Set();
-
-  for (let i = 0; i < qRef.current.length; i++) {
-    const token = qRef.current[i];
-
-    if (!uniqueOnsets.has(token.time)) {
-      uniqueOnsets.add(token.time);
-    }
-  }
-  const onsetDensity = uniqueOnsets.size;
-  const onsetDensityNorm = Math.min(1, onsetDensity / MAX_DENSITY); // normalized
-
-  // blue to red --> low to high onsetDensity
-  const r = parseInt(onsetDensityNorm * 255);
+export function getColor(curTime, startTime) {
+  const timePercentChange = Math.min(
+    1.0,
+    Math.max(0.0, (startTime - curTime) / (TIME_THRESH / 3))
+  );
+  // blue to red --> as curTime gets closer to startTime
+  const r = parseInt((1 - timePercentChange) * 255);
   const g = 0;
-  const b = parseInt((1 - onsetDensityNorm) * 255);
+  const b = parseInt(timePercentChange * 255);
+  console.log("r and b: ", r, " and ", b);
   return `rgba(${r}, ${g}, ${b},${getAlpha(curTime, startTime)})`;
 }
 

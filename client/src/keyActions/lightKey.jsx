@@ -3,7 +3,6 @@ import {
   blackKeyY,
   whiteKeyY,
   getX,
-  getAlpha,
   getHeight,
   getWidth,
 } from "./constants";
@@ -18,9 +17,7 @@ export const lightKey = (canvas, midi, curTime, startTime, color) => {
   }
 
   const isBlackKey = blackKeys.includes(midi);
-
-  const alpha = getAlpha(curTime, startTime);
-  const rgba = `rgba(${color[0]},${color[1]},${color[2]},${alpha})`;
+  const rgba = color;
   const height = getHeight(curTime, startTime, isBlackKey);
   const width = getWidth(curTime, startTime, isBlackKey);
 

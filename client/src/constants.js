@@ -11,10 +11,6 @@ export const COLORS = [
 
 export const MAIN_COLOR = [67, 49, 143];
 
-export function getChordKey(token) {
-  return `${token.time.toFixed(3)}-${token.duration.toFixed(3)}`;
-}
-
 // ashley work here
 // export function getRepetition(qRef, curTime) {
 //   console.log("repeition:");
