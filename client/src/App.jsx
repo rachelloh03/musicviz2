@@ -29,7 +29,7 @@ export default function App() {
       // light current keys
       qRef.current.forEach((token) => {
         if (
-          token.time <= curTimeRef.current &&
+          token.time - TIME_THRESH <= curTimeRef.current &&
           curTimeRef.current <= token.time + token.duration
         ) {
           lightKey(
