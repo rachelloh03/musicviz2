@@ -77,7 +77,6 @@ export function getColor(curTime, startTime) {
   const r = parseInt(timePercentChange * 255);
   const g = 0;
   const b = parseInt((1 - timePercentChange) * 255);
-  console.log("r and b: ", r, " and ", b);
   return `rgba(${r}, ${g}, ${b},${getAlpha(curTime, startTime)})`;
 }
 
@@ -100,4 +99,34 @@ export function getWidth(curTime, startTime, isBlackKey) {
     const t = (curTime - startTime) / SKINNY_TIME;
     return fullWidth + t * (playingNoteWidth - fullWidth);
   }
+}
+
+export function lightFutureRange(q, canvas, curTime) {
+  const ctx = canvas.getContext("2d");
+  if (!ctx) {
+    return;
+  }
+  let minX = Number.POSITIVE_INFINITY;
+  let maxX = Number.NEGATIVE_INFINITY;
+  q.forEach((token) => {
+    const { time, _duration, _instrument, note } = token;
+    if (time > curTime && time - curTime <= TIME_THRESH) {
+      const isBlackKey = blackKeys.includes(note);
+      const x = getX(canvas, note, isBlackKey, curTime, time);
+      minX = Math.min(minX, x);
+      maxX = Math.max(maxX, x);
+    }
+  });
+
+  if (minX === Number.POSITIVE_INFINITY) return;
+
+  const rgba = "rgba(255, 105, 179, 0.25)";
+  ctx.strokeStyle = rgba;
+  ctx.fillStyle = rgba;
+
+  // simple rectangle
+  ctx.beginPath();
+  ctx.rect(minX, whiteKeyY, maxX - minX + whiteKeyWidth, -whiteKeyHeight);
+  ctx.fill();
+  ctx.restore();
 }

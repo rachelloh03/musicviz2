@@ -4,7 +4,7 @@ import { PerspectiveTransform } from "react-perspective-transform";
 import { lightKey } from "./keyActions/lightKey";
 import { useFutureNotes } from "./FutureNotesProvider/useFutureNotes";
 import { TIME_THRESH, MAX_FUTURE_NOTES } from "./constants";
-import { getColor } from "./keyActions/constants";
+import { getColor, lightFutureRange } from "./keyActions/constants";
 
 export default function App() {
   const canvasRef = useRef(null);
@@ -23,10 +23,13 @@ export default function App() {
       }
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      // light keys
+      // light future range
+      lightFutureRange(qRef.current, canvasRef.current, curTimeRef.current);
+
+      // light current keys
       qRef.current.forEach((token) => {
         if (
-          token.time - TIME_THRESH <= curTimeRef.current &&
+          token.time <= curTimeRef.current &&
           curTimeRef.current <= token.time + token.duration
         ) {
           lightKey(
