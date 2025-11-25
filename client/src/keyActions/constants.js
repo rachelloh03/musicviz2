@@ -71,12 +71,12 @@ export function getAlpha(curTime, startTime) {
 export function getColor(curTime, startTime) {
   const timePercentChange = Math.min(
     1.0,
-    Math.max(0.0, (startTime - curTime) / (TIME_THRESH / 2))
+    Math.max(0.0, 1 - (startTime - curTime) / TIME_THRESH)
   );
   // blue to red --> as curTime gets closer to startTime
-  const r = parseInt((1 - timePercentChange) * 255);
+  const r = parseInt(timePercentChange * 255);
   const g = 0;
-  const b = parseInt(timePercentChange * 255);
+  const b = parseInt((1 - timePercentChange) * 255);
   console.log("r and b: ", r, " and ", b);
   return `rgba(${r}, ${g}, ${b},${getAlpha(curTime, startTime)})`;
 }
