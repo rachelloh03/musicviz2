@@ -1,5 +1,5 @@
 import "./App.css";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { PerspectiveTransform } from "react-perspective-transform";
 import { lightKey } from "./keyActions/lightKey";
 import { useFutureNotes } from "./FutureNotesProvider/useFutureNotes";
@@ -9,6 +9,7 @@ import { getColor, lightFutureRange } from "./keyActions/constants";
 export default function App() {
   const canvasRef = useRef(null);
   const { qRef, curTimeRef } = useFutureNotes();
+  const [rectOn, setRectOn] = useState(true);
 
   useEffect(() => {
     let animId;
@@ -24,7 +25,9 @@ export default function App() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
       // light future range
-      lightFutureRange(qRef.current, canvasRef.current, curTimeRef.current);
+      if (rectOn) {
+        lightFutureRange(qRef.current, canvasRef.current, curTimeRef.current);
+      }
 
       // light current keys
       qRef.current.forEach((token) => {
@@ -55,6 +58,21 @@ export default function App() {
     animate();
     return () => cancelAnimationFrame(animId);
     //eslint-disable-next-line
+  }, [rectOn]);
+
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      if (event.repeat) return; // prevent key repeat
+
+      if (event.key == "r") {
+        setRectOn((prev) => !prev);
+      }
+    };
+    document.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+    };
   }, []);
 
   return (
