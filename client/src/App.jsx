@@ -63,23 +63,32 @@ export default function App() {
         backgroundColor: "#000",
         width: "100vw",
         height: "100vh",
-        border: "1px solid #ccc",
       }}
     >
-      <PerspectiveTransform>
-        <img src="/keyboard.JPG" alt="keyboard" style={{ width: "50%" }} />
-        <canvas
-          ref={canvasRef}
-          width={400}
-          height={300}
-          style={{
-            position: "relative",
-            top: 0,
-            left: 0,
-            pointerEvents: "none",
-          }}
-        />
-      </PerspectiveTransform>
+      <div
+        style={{
+          backgroundColor: "#000",
+          width: 400,
+          height: 300,
+        }}
+      >
+        <PerspectiveTransform>
+          <img src="/keyboard.JPG" alt="keyboard" style={{ width: "100%" }} />
+          <canvas
+            ref={canvasRef}
+            width={400}
+            height={300}
+            style={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              width: "100%",
+              height: "100%",
+              pointerEvents: "none",
+            }}
+          />
+        </PerspectiveTransform>
+      </div>
     </div>
   );
 }
