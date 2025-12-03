@@ -7,7 +7,14 @@ import {
   getWidth,
 } from "./constants";
 
-export const lightKey = (canvas, midi, curTime, startTime, color) => {
+export const lightKey = (
+  canvas,
+  midi,
+  curTime,
+  startTime,
+  color,
+  futureThresh
+) => {
   if (!canvas) {
     return;
   }
@@ -18,7 +25,7 @@ export const lightKey = (canvas, midi, curTime, startTime, color) => {
 
   const isBlackKey = blackKeys.includes(midi);
   const rgba = color;
-  const height = getHeight(curTime, startTime, isBlackKey);
+  const height = getHeight(curTime, startTime, isBlackKey, futureThresh);
   const width = getWidth(curTime, startTime, isBlackKey);
 
   ctx.strokeStyle = rgba;

@@ -10,6 +10,7 @@ export default function App() {
   const canvasRef = useRef(null);
   const { qRef, curTimeRef } = useFutureNotes();
   const [rectOn, setRectOn] = useState(true);
+  const [futureThresh, setFutureThresh] = useState(TIME_THRESH);
 
   useEffect(() => {
     let animId;
@@ -26,13 +27,18 @@ export default function App() {
 
       // light future range
       if (rectOn) {
-        lightFutureRange(qRef.current, canvasRef.current, curTimeRef.current);
+        lightFutureRange(
+          qRef.current,
+          canvasRef.current,
+          curTimeRef.current,
+          futureThresh
+        );
       }
 
       // light current keys
       qRef.current.forEach((token) => {
         if (
-          token.time - TIME_THRESH <= curTimeRef.current &&
+          token.time - futureThresh <= curTimeRef.current &&
           curTimeRef.current <= token.time + token.duration
         ) {
           lightKey(
@@ -40,7 +46,8 @@ export default function App() {
             token.note,
             curTimeRef.current,
             token.time,
-            getColor(curTimeRef.current, token.time)
+            getColor(curTimeRef.current, token.time, futureThresh),
+            futureThresh
           );
         }
       });
@@ -58,14 +65,26 @@ export default function App() {
     animate();
     return () => cancelAnimationFrame(animId);
     //eslint-disable-next-line
-  }, [rectOn]);
+  }, [rectOn, futureThresh]);
 
   useEffect(() => {
     const handleKeyDown = (event) => {
       if (event.repeat) return; // prevent key repeat
 
-      if (event.key == "r") {
+      if (event.key === "r") {
         setRectOn((prev) => !prev);
+      }
+
+      if (event.key === "ArrowUp") {
+        // increase time thresh by half a sec
+        // 10 * 100 = 10 sec, which is max thresh possible
+        setFutureThresh((prev) =>
+          prev !== 10 * 100 ? (prev += 50) : 10 * 100
+        );
+      }
+
+      if (event.key === "ArrowDown") {
+        setFutureThresh((prev) => (prev !== 0 ? (prev -= 50) : 0));
       }
     };
     document.addEventListener("keydown", handleKeyDown);
