@@ -1,3 +1,5 @@
+import { ONE_SEC } from "../constants";
+
 const FUTURE_RANGE_COLOR = "rgba(133, 243, 205, 0.5)";
 const blackKeysArr = [];
 
@@ -100,6 +102,27 @@ export function getWidth(curTime, startTime, isBlackKey) {
     const t = (curTime - startTime) / SKINNY_TIME;
     return fullWidth + t * (playingNoteWidth - fullWidth);
   }
+}
+
+export function showFutureThresh(canvas, futureThresh) {
+  const ctx = canvas.getContext("2d");
+  if (!ctx) {
+    return;
+  }
+
+  ctx.font = "bold 30px Arial";
+  ctx.fillStyle = "black";
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  const x = canvas.width / 2;
+  const y = canvas.height / 4;
+
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.rotate(Math.PI);
+
+  ctx.fillText(`${futureThresh / ONE_SEC} SEC`, 0, 0);
+  ctx.restore();
 }
 
 export function lightFutureRange(q, canvas, curTime, futureThresh) {

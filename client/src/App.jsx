@@ -3,14 +3,38 @@ import { useEffect, useRef, useState } from "react";
 import { PerspectiveTransform } from "react-perspective-transform";
 import { lightKey } from "./keyActions/lightKey";
 import { useFutureNotes } from "./FutureNotesProvider/useFutureNotes";
-import { TIME_THRESH, MAX_FUTURE_NOTES } from "./constants";
-import { getColor, lightFutureRange } from "./keyActions/constants";
+import { TIME_THRESH, MAX_FUTURE_NOTES, ONE_SEC } from "./constants";
+import {
+  getColor,
+  lightFutureRange,
+  showFutureThresh,
+} from "./keyActions/constants";
 
 export default function App() {
   const canvasRef = useRef(null);
   const { qRef, curTimeRef } = useFutureNotes();
   const [rectOn, setRectOn] = useState(true);
   const [futureThresh, setFutureThresh] = useState(TIME_THRESH);
+  const futureThreshVisibleRef = useRef(false);
+  const futureThreshTimeoutRef = useRef(null);
+
+  useEffect(() => {
+    if (futureThreshTimeoutRef.current) {
+      clearTimeout(futureThreshTimeoutRef.current);
+    }
+
+    futureThreshVisibleRef.current = true;
+
+    // Hide it after 1 second
+    futureThreshTimeoutRef.current = setTimeout(() => {
+      futureThreshVisibleRef.current = false;
+    }, 1000);
+
+    return () => {
+      if (futureThreshTimeoutRef.current)
+        clearTimeout(futureThreshTimeoutRef.current);
+    };
+  }, [futureThresh]);
 
   useEffect(() => {
     let animId;
@@ -24,6 +48,10 @@ export default function App() {
         return;
       }
       ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      if (futureThreshVisibleRef.current) {
+        showFutureThresh(canvas, futureThresh);
+      }
 
       // light future range
       if (rectOn) {
@@ -77,9 +105,8 @@ export default function App() {
 
       if (event.key === "ArrowUp") {
         // increase time thresh by half a sec
-        // 10 * 100 = 10 sec, which is max thresh possible
         setFutureThresh((prev) =>
-          prev !== 10 * 100 ? (prev += 50) : 10 * 100
+          prev !== 10 * ONE_SEC ? (prev += 50) : 10 * ONE_SEC
         );
       }
 
@@ -93,6 +120,26 @@ export default function App() {
       document.removeEventListener("keydown", handleKeyDown);
     };
   }, []);
+
+  useEffect(() => {
+    console.log("futureThresh: ", futureThresh);
+  }, [futureThresh]);
+
+  // useEffect(() => {
+  //   const canvas = canvasRef.current;
+  //   const ctx = canvas.getContext("2d");
+  //   if (!ctx) return;
+  //   let timeoutId;
+
+  //   ctx.clearRect(0, 0, canvas.width, canvas.height);
+  //   showFutureThresh(canvas, futureThresh);
+
+  //   timeoutId = setTimeout(() => {
+  //     ctx.clearRect(0, 0, canvas.width, canvas.height);
+  //   }, ONE_SEC);
+
+  //   return () => clearTimeout(timeoutId);
+  // }, [futureThresh]);
 
   return (
     <div

@@ -1,5 +1,6 @@
 export const MAX_FUTURE_NOTES = 100;
 export const TIME_THRESH = 100;
+export const ONE_SEC = 100;
 
 export const COLORS = [
   [153, 85, 187],
