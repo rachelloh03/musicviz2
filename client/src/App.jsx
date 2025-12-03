@@ -49,10 +49,6 @@ export default function App() {
       }
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      if (futureThreshVisibleRef.current) {
-        showFutureThresh(canvas, futureThresh);
-      }
-
       // light future range
       if (rectOn) {
         lightFutureRange(
@@ -86,6 +82,10 @@ export default function App() {
 
       if (qRef.current.length > MAX_FUTURE_NOTES) {
         qRef.current.splice(0, qRef.current.length - MAX_FUTURE_NOTES);
+      }
+
+      if (futureThreshVisibleRef.current) {
+        showFutureThresh(canvas, futureThresh);
       }
 
       animId = requestAnimationFrame(animate);
