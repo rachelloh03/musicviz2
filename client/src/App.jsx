@@ -14,9 +14,27 @@ export default function App() {
   const canvasRef = useRef(null);
   const { qRef, curTimeRef } = useFutureNotes();
   const [rectOn, setRectOn] = useState(true);
+  const [notesOn, setNotesOn] = useState(true);
   const [futureThresh, setFutureThresh] = useState(TIME_THRESH);
+  const rectOnRef = useRef(rectOn);
+  const notesOnRef = useRef(notesOn);
+  const futureThreshRef = useRef(futureThresh);
   const futureThreshVisibleRef = useRef(false);
   const futureThreshTimeoutRef = useRef(null);
+  const lastTriggerRef = useRef({});
+  const activeMIDINotesRef = useRef(new Map());
+
+  useEffect(() => {
+    rectOnRef.current = rectOn;
+  }, [rectOn]);
+
+  useEffect(() => {
+    notesOnRef.current = notesOn;
+  }, [notesOn]);
+
+  useEffect(() => {
+    futureThreshRef.current = futureThresh;
+  }, [futureThresh]);
 
   useEffect(() => {
     if (futureThreshTimeoutRef.current) {
@@ -50,35 +68,50 @@ export default function App() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
       if (futureThreshVisibleRef.current) {
-        showFutureThresh(canvas, futureThresh);
+        showFutureThresh(canvas, futureThreshRef.current);
       }
 
       // light future range
-      if (rectOn) {
+      if (rectOnRef.current) {
         lightFutureRange(
           qRef.current,
           canvasRef.current,
           curTimeRef.current,
-          futureThresh
+          futureThreshRef.current
         );
       }
 
-      // light current keys
-      qRef.current.forEach((token) => {
-        if (
-          token.time - futureThresh <= curTimeRef.current &&
-          curTimeRef.current <= token.time + token.duration
-        ) {
-          lightKey(
-            canvasRef.current,
-            token.note,
-            curTimeRef.current,
-            token.time,
-            getColor(curTimeRef.current, token.time, futureThresh),
-            futureThresh
-          );
-        }
-      });
+      // light keys
+      if (notesOnRef.current) {
+        qRef.current.forEach((token) => {
+          if (
+            token.time - futureThreshRef.current <= curTimeRef.current &&
+            curTimeRef.current <= token.time + token.duration
+          ) {
+            lightKey(
+              canvasRef.current,
+              token.note,
+              curTimeRef.current,
+              token.time,
+              getColor(curTimeRef.current, token.time, futureThreshRef.current),
+              futureThreshRef.current
+            );
+          }
+        });
+      }
+
+      // Light currently playing MIDI notes
+      const now = curTimeRef.current;
+      for (const [midi, noteTime] of activeMIDINotesRef.current.entries()) {
+        lightKey(
+          canvasRef.current,
+          midi,
+          now,
+          noteTime,
+          getColor(now, noteTime, futureThreshRef.current),
+          futureThreshRef.current
+        );
+      }
 
       qRef.current = qRef.current.filter(
         (token) => curTimeRef.current <= token.time + token.duration
@@ -93,37 +126,75 @@ export default function App() {
     animate();
     return () => cancelAnimationFrame(animId);
     //eslint-disable-next-line
-  }, [rectOn, futureThresh]);
-
-  useEffect(() => {
-    const handleKeyDown = (event) => {
-      if (event.repeat) return; // prevent key repeat
-
-      if (event.key === "r") {
-        setRectOn((prev) => !prev);
-      }
-
-      if (event.key === "ArrowUp") {
-        // increase time thresh by half a sec
-        setFutureThresh((prev) =>
-          prev !== 10 * ONE_SEC ? (prev += 50) : 10 * ONE_SEC
-        );
-      }
-
-      if (event.key === "ArrowDown") {
-        setFutureThresh((prev) => (prev !== 0 ? (prev -= 50) : 0));
-      }
-    };
-    document.addEventListener("keydown", handleKeyDown);
-
-    return () => {
-      document.removeEventListener("keydown", handleKeyDown);
-    };
   }, []);
 
+  const handleCurrMIDI = () => (event) => {
+    const [status, midi, velocity] = event.data;
+
+    if (status === 144 && velocity > 0) {
+      activeMIDINotesRef.current.set(midi, curTimeRef.current);
+    } else if (status === 128 || (status === 144 && velocity === 0)) {
+      activeMIDINotesRef.current.delete(midi);
+    }
+  };
+
+  const handleParams = () => (event) => {
+    const [status, midi, velocity] = event.data;
+    if (status === 144 && velocity > 0) {
+      const now = Date.now();
+      const lastTrigger = lastTriggerRef.current[midi] || 0;
+
+      // Ignore if triggered within last 200ms
+      if (now - lastTrigger < 200) {
+        return;
+      }
+      lastTriggerRef.current[midi] = now;
+
+      if (midi === 44) {
+        setRectOn((prev) => !prev);
+      }
+      if (midi === 45) {
+        setFutureThresh((prev) => Math.max(0, prev - 50));
+      }
+      if (midi === 46) {
+        setFutureThresh((prev) => Math.min(10 * ONE_SEC, prev + 50));
+      }
+      if (midi === 47) {
+        setNotesOn((prev) => !prev);
+      }
+    }
+  };
+
   useEffect(() => {
-    console.log("futureThresh: ", futureThresh);
-  }, [futureThresh]);
+    let midiAccess;
+
+    navigator
+      .requestMIDIAccess()
+      .then((access) => {
+        midiAccess = access;
+        for (const input of midiAccess.inputs.values()) {
+          if (input.name === "GarageBand Virtual Out") {
+            continue;
+          }
+          if (input.name === "MPKmini2") {
+            input.onmidimessage = handleParams();
+            continue;
+          }
+          input.onmidimessage = handleCurrMIDI();
+        }
+      })
+      .catch((err) => console.error("MIDI not supported", err));
+
+    return () => {
+      // Cleanup MIDI listeners
+      if (midiAccess) {
+        for (const input of midiAccess.inputs.values()) {
+          input.onmidimessage = null;
+        }
+      }
+    };
+    //eslint-disable-next-line
+  }, []);
 
   return (
     <div
