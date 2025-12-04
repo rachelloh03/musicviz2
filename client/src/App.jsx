@@ -101,16 +101,18 @@ export default function App() {
       }
 
       // Light currently playing MIDI notes
-      const now = curTimeRef.current;
-      for (const [midi, noteTime] of activeMIDINotesRef.current.entries()) {
-        lightKey(
-          canvasRef.current,
-          midi,
-          now,
-          noteTime,
-          getColor(now, noteTime, futureThreshRef.current),
-          futureThreshRef.current
-        );
+      if (notesOnRef.current) {
+        const now = curTimeRef.current;
+        for (const [midi, noteTime] of activeMIDINotesRef.current.entries()) {
+          lightKey(
+            canvasRef.current,
+            midi,
+            now,
+            noteTime,
+            getColor(now, noteTime, futureThreshRef.current),
+            futureThreshRef.current
+          );
+        }
       }
 
       qRef.current = qRef.current.filter(
