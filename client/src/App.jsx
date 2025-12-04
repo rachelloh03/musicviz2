@@ -98,18 +98,15 @@ export default function App() {
             );
           }
         });
-      }
 
-      // Light currently playing MIDI notes
-      if (notesOnRef.current) {
-        const now = curTimeRef.current;
+        // light current notes
         for (const [midi, noteTime] of activeMIDINotesRef.current.entries()) {
           lightKey(
             canvasRef.current,
             midi,
-            now,
+            curTimeRef.current,
             noteTime,
-            getColor(now, noteTime, futureThreshRef.current),
+            getColor(curTimeRef.current, noteTime, futureThreshRef.current),
             futureThreshRef.current
           );
         }
