@@ -80,7 +80,12 @@ export function getColor(curTime, startTime, futureThresh) {
   const r = parseInt(timePercentChange * 255);
   const g = 0;
   const b = parseInt((1 - timePercentChange) * 255);
-  return `rgba(${r}, ${g}, ${b},${getAlpha(curTime, startTime, futureThresh)})`;
+  const rgba = `rgba(${r}, ${g}, ${b},${getAlpha(
+    curTime,
+    startTime,
+    futureThresh
+  )})`;
+  return rgba;
 }
 
 export function getHeight(curTime, startTime, isBlackKey, futureThresh) {

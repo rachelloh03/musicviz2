@@ -12,11 +12,26 @@ import {
 
 export default function App() {
   const canvasRef = useRef(null);
-  const { qRef, curTimeRef } = useFutureNotes();
+  const { qRef, curTimeRef, repDetected } = useFutureNotes();
   const [rectOn, setRectOn] = useState(true);
   const [futureThresh, setFutureThresh] = useState(TIME_THRESH);
   const futureThreshVisibleRef = useRef(false);
   const futureThreshTimeoutRef = useRef(null);
+
+  // useEffect(() => {
+  //   if (repDetected) {
+  //     console.log("REPETITION DETECTED");
+  //     // lightKey(
+  //     //   canvasRef.current,
+  //     //   36,
+  //     //   curTimeRef.current,
+  //     //   curTimeRef.current,
+  //     //   "rgba(0,255,0,1.0)",
+  //     //   futureThresh
+  //     // );
+  //   } else console.log("CHANGED FROM TRUE TO FALSE");
+  //   //eslint-disable-next-line
+  // }, [repDetected]);
 
   useEffect(() => {
     if (futureThreshTimeoutRef.current) {
@@ -48,6 +63,19 @@ export default function App() {
         return;
       }
       ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // light leftmost key to show repetition detected
+      if (repDetected) {
+        // console.log("REPETITION DETECTED");
+        lightKey(
+          canvasRef.current,
+          36,
+          curTimeRef.current,
+          curTimeRef.current,
+          "rgba(0,255,0,1)",
+          futureThresh
+        );
+      }
 
       // light future range
       if (rectOn) {
@@ -93,7 +121,7 @@ export default function App() {
     animate();
     return () => cancelAnimationFrame(animId);
     //eslint-disable-next-line
-  }, [rectOn, futureThresh]);
+  }, [rectOn, futureThresh, repDetected]);
 
   useEffect(() => {
     const handleKeyDown = (event) => {
