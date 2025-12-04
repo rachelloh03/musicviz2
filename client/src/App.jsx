@@ -18,21 +18,6 @@ export default function App() {
   const futureThreshVisibleRef = useRef(false);
   const futureThreshTimeoutRef = useRef(null);
 
-  // useEffect(() => {
-  //   if (repDetected) {
-  //     console.log("REPETITION DETECTED");
-  //     // lightKey(
-  //     //   canvasRef.current,
-  //     //   36,
-  //     //   curTimeRef.current,
-  //     //   curTimeRef.current,
-  //     //   "rgba(0,255,0,1.0)",
-  //     //   futureThresh
-  //     // );
-  //   } else console.log("CHANGED FROM TRUE TO FALSE");
-  //   //eslint-disable-next-line
-  // }, [repDetected]);
-
   useEffect(() => {
     if (futureThreshTimeoutRef.current) {
       clearTimeout(futureThreshTimeoutRef.current);
@@ -64,17 +49,8 @@ export default function App() {
       }
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      // light leftmost key to show repetition detected
-      if (repDetected) {
-        // console.log("REPETITION DETECTED");
-        lightKey(
-          canvasRef.current,
-          36,
-          curTimeRef.current,
-          curTimeRef.current,
-          "rgba(0,255,0,1)",
-          futureThresh
-        );
+      if (futureThreshVisibleRef.current) {
+        showFutureThresh(canvas, futureThresh);
       }
 
       // light future range
@@ -110,10 +86,6 @@ export default function App() {
 
       if (qRef.current.length > MAX_FUTURE_NOTES) {
         qRef.current.splice(0, qRef.current.length - MAX_FUTURE_NOTES);
-      }
-
-      if (futureThreshVisibleRef.current) {
-        showFutureThresh(canvas, futureThresh);
       }
 
       animId = requestAnimationFrame(animate);
@@ -152,22 +124,6 @@ export default function App() {
   useEffect(() => {
     console.log("futureThresh: ", futureThresh);
   }, [futureThresh]);
-
-  // useEffect(() => {
-  //   const canvas = canvasRef.current;
-  //   const ctx = canvas.getContext("2d");
-  //   if (!ctx) return;
-  //   let timeoutId;
-
-  //   ctx.clearRect(0, 0, canvas.width, canvas.height);
-  //   showFutureThresh(canvas, futureThresh);
-
-  //   timeoutId = setTimeout(() => {
-  //     ctx.clearRect(0, 0, canvas.width, canvas.height);
-  //   }, ONE_SEC);
-
-  //   return () => clearTimeout(timeoutId);
-  // }, [futureThresh]);
 
   return (
     <div
