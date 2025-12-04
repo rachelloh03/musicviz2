@@ -12,7 +12,7 @@ import {
 
 export default function App() {
   const canvasRef = useRef(null);
-  const { qRef, curTimeRef, repDetected } = useFutureNotes();
+  const { qRef, curTimeRef } = useFutureNotes();
   const [rectOn, setRectOn] = useState(true);
   const [futureThresh, setFutureThresh] = useState(TIME_THRESH);
   const futureThreshVisibleRef = useRef(false);
@@ -93,7 +93,7 @@ export default function App() {
     animate();
     return () => cancelAnimationFrame(animId);
     //eslint-disable-next-line
-  }, [rectOn, futureThresh, repDetected]);
+  }, [rectOn, futureThresh]);
 
   useEffect(() => {
     const handleKeyDown = (event) => {

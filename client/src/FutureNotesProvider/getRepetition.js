@@ -50,8 +50,7 @@ export function getRepetition(qRef) {
   let max_pattern = Math.max(1, Math.min(8, Math.ceil(pitches.length * 0.25)));
   // console.log(max_pattern);
 
-  //   let min_repeats = Math.max(NUM_REPEATS, Math.round(4 * density));
-  let min_repeats = 2;
+  let min_repeats = Math.max(NUM_REPEATS, Math.round(4 * density));
   // console.log(min_repeats);
 
   // ---- HASH chord-sets like Python ----
