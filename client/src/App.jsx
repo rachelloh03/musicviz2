@@ -138,29 +138,28 @@ export default function App() {
   };
 
   const handleParams = () => (event) => {
-    const [status, midi, velocity] = event.data;
-    if (status === 144 && velocity > 0) {
-      const now = Date.now();
-      const lastTrigger = lastTriggerRef.current[midi] || 0;
+    const [_status, pad] = event.data;
 
-      // Ignore if triggered within last 200ms
-      if (now - lastTrigger < 200) {
-        return;
-      }
-      lastTriggerRef.current[midi] = now;
+    const now = Date.now();
+    const lastTrigger = lastTriggerRef.current[pad] || 0;
 
-      if (midi === 44) {
-        setRectOn((prev) => !prev);
-      }
-      if (midi === 45) {
-        setFutureThresh((prev) => Math.max(0, prev - 50));
-      }
-      if (midi === 46) {
-        setFutureThresh((prev) => Math.min(10 * ONE_SEC, prev + 50));
-      }
-      if (midi === 47) {
-        setNotesOn((prev) => !prev);
-      }
+    // Ignore if triggered within last 200ms
+    if (now - lastTrigger < 200) {
+      return;
+    }
+    lastTriggerRef.current[pad] = now;
+
+    if (pad === 0) {
+      setRectOn((prev) => !prev);
+    }
+    if (pad === 1) {
+      setFutureThresh((prev) => Math.max(0, prev - 50));
+    }
+    if (pad === 2) {
+      setFutureThresh((prev) => Math.min(10 * ONE_SEC, prev + 50));
+    }
+    if (pad === 3) {
+      setNotesOn((prev) => !prev);
     }
   };
 
