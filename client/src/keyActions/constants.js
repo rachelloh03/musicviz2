@@ -23,6 +23,7 @@ export const whiteKeys = Array.from({ length: 128 }, (_, i) => i).filter(
 );
 
 export const playingNoteWidth = 3;
+export const incNoteWidthRate = 75;
 export const blackKeyWidth = 7;
 export const whiteKeyWidth = 11; //11
 export const blackKeyHeight = 155;
@@ -52,12 +53,8 @@ export function getX(canvas, midi, isBlackKey, curTime, startTime) {
     const closestWhiteKey = whiteKeys.filter((n) => n < midi).pop();
     x = getWhiteX(closestWhiteKey) + 0.5 * whiteKeyWidth;
   }
-  if (curTime < startTime) {
-    return canvas.width - x;
-  } else {
-    const delta = (keyWidth - curWidth) / 2;
-    return canvas.width - (x - delta);
-  }
+  const delta = (keyWidth - curWidth) / 2;
+  return canvas.width - (x - delta);
 }
 
 export const MAX_DENSITY = 20;
@@ -99,13 +96,11 @@ export const SKINNY_TIME = 50;
 
 export function getWidth(curTime, startTime, isBlackKey) {
   const fullWidth = isBlackKey ? blackKeyWidth : whiteKeyWidth;
-  if (curTime <= startTime) {
-    return fullWidth;
-  } else if (curTime >= startTime + SKINNY_TIME) {
+  if (curTime < startTime) {
     return playingNoteWidth;
   } else {
     const t = (curTime - startTime) / SKINNY_TIME;
-    return fullWidth + t * (playingNoteWidth - fullWidth);
+    return Math.min(playingNoteWidth + t * incNoteWidthRate, fullWidth);
   }
 }
 
