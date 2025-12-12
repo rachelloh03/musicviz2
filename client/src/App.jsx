@@ -23,6 +23,7 @@ export default function App() {
   const futureThreshTimeoutRef = useRef(null);
   const lastTriggerRef = useRef({});
   const activeMIDINotesRef = useRef(new Map());
+  const roliRef = useRef(null);
 
   useEffect(() => {
     rectOnRef.current = rectOn;
@@ -66,7 +67,6 @@ export default function App() {
         return;
       }
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-
       if (futureThreshVisibleRef.current) {
         showFutureThresh(canvas, futureThreshRef.current);
       }
@@ -81,7 +81,7 @@ export default function App() {
         );
       }
 
-      // light keys
+      // light future notes
       if (notesOnRef.current) {
         qRef.current.forEach((token) => {
           if (
@@ -94,7 +94,8 @@ export default function App() {
               curTimeRef.current,
               token.time,
               getColor(curTimeRef.current, token.time, futureThreshRef.current),
-              futureThreshRef.current
+              futureThreshRef.current,
+              roliRef.current
             );
           }
         });
@@ -107,7 +108,8 @@ export default function App() {
             curTimeRef.current,
             noteTime,
             getColor(curTimeRef.current, noteTime, futureThreshRef.current),
-            futureThreshRef.current
+            futureThreshRef.current,
+            roliRef.current
           );
         }
       }
@@ -123,7 +125,9 @@ export default function App() {
       animId = requestAnimationFrame(animate);
     };
     animate();
-    return () => cancelAnimationFrame(animId);
+    return () => {
+      cancelAnimationFrame(animId);
+    };
     //eslint-disable-next-line
   }, []);
 
@@ -171,7 +175,10 @@ export default function App() {
       .then((access) => {
         midiAccess = access;
         for (const input of midiAccess.inputs.values()) {
-          if (input.name === "GarageBand Virtual Out") {
+          if (
+            input.name === "GarageBand Virtual Out" ||
+            input.name === "LUMI Keys BLOCK"
+          ) {
             continue;
           }
           if (input.name === "MPKmini2") {
@@ -179,6 +186,12 @@ export default function App() {
             continue;
           }
           input.onmidimessage = handleCurrMIDI();
+        }
+
+        for (const output of midiAccess.outputs.values()) {
+          if (output.name === "LUMI Keys BLOCK") {
+            roliRef.current = output;
+          }
         }
       })
       .catch((err) => console.error("MIDI not supported", err));

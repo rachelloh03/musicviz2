@@ -5,6 +5,7 @@ import {
   getX,
   getHeight,
   getWidth,
+  getAlpha,
 } from "./constants";
 
 export const lightKey = (
@@ -13,7 +14,8 @@ export const lightKey = (
   curTime,
   startTime,
   color,
-  futureThresh
+  futureThresh,
+  roli = null
 ) => {
   if (!canvas) {
     return;
@@ -39,4 +41,11 @@ export const lightKey = (
   ctx.rect(x, y, width, height);
   ctx.fill();
   ctx.restore();
+
+  const alpha = getAlpha(curTime, startTime, futureThresh);
+
+  // roli
+  if (roli) {
+    roli.send([0x90, midi, Math.floor(alpha * 127)]); // send alpha as velocity
+  }
 };
