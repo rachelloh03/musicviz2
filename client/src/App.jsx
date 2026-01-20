@@ -14,7 +14,8 @@ import {
 
 export default function App() {
   const canvasRef = useRef(null);
-  const { qRef, curTimeRef, oodScoreRef } = useFutureNotes();
+  // const { qRef, curTimeRef, oodScoreRef } = useFutureNotes();
+  const { qRef, curTimeRef } = useFutureNotes();
   const [rectOn, setRectOn] = useState(true);
   const [notesOn, setNotesOn] = useState(true);
   const [futureThresh, setFutureThresh] = useState(TIME_THRESH);
