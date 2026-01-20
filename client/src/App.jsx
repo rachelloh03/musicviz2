@@ -2,6 +2,8 @@ import "./App.css";
 import { useEffect, useRef, useState } from "react";
 import { PerspectiveTransform } from "react-perspective-transform";
 import { lightKey } from "./keyActions/lightKey";
+// import { displaySpeedometer } from "./displayOODScore/displaySpeedometer";
+import { displayProgressBar } from "./displayOODScore/displayProgressBar";
 import { useFutureNotes } from "./FutureNotesProvider/useFutureNotes";
 import { TIME_THRESH, MAX_FUTURE_NOTES, ONE_SEC } from "./constants";
 import {
@@ -12,7 +14,7 @@ import {
 
 export default function App() {
   const canvasRef = useRef(null);
-  const { qRef, curTimeRef } = useFutureNotes();
+  const { qRef, curTimeRef, oodScoreRef } = useFutureNotes();
   const [rectOn, setRectOn] = useState(true);
   const [notesOn, setNotesOn] = useState(true);
   const [futureThresh, setFutureThresh] = useState(TIME_THRESH);
@@ -77,7 +79,7 @@ export default function App() {
           qRef.current,
           canvasRef.current,
           curTimeRef.current,
-          futureThreshRef.current
+          futureThreshRef.current,
         );
       }
 
@@ -95,7 +97,7 @@ export default function App() {
               token.time,
               getColor(curTimeRef.current, token.time, futureThreshRef.current),
               futureThreshRef.current,
-              roliRef.current
+              roliRef.current,
             );
           }
         });
@@ -109,18 +111,23 @@ export default function App() {
             noteTime,
             getColor(curTimeRef.current, noteTime, futureThreshRef.current),
             futureThreshRef.current,
-            roliRef.current
+            roliRef.current,
           );
         }
       }
 
       qRef.current = qRef.current.filter(
-        (token) => curTimeRef.current <= token.time + token.duration
+        (token) => curTimeRef.current <= token.time + token.duration,
       );
 
       if (qRef.current.length > MAX_FUTURE_NOTES) {
         qRef.current.splice(0, qRef.current.length - MAX_FUTURE_NOTES);
       }
+
+      // show OOD score
+      // displayOODScore(canvasRef.current, oodScoreRef.current);
+      // displaySpeedometer(canvasRef.current, 80);
+      displayProgressBar(canvasRef.current, 80);
 
       animId = requestAnimationFrame(animate);
     };

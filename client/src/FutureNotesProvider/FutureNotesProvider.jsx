@@ -1,10 +1,10 @@
 import { useEffect, useRef } from "react";
 import { FutureNotesContext } from "./FutureNotesContext";
-import { REPETITION_WINDOW_MS } from "./constants";
 
 export const FutureNotesProvider = ({ children }) => {
   const qRef = useRef([]);
   const curTimeRef = useRef(null);
+  const oodScoreRef = useRef(null);
 
   useEffect(() => {
     const ws = new WebSocket("ws://localhost:8081"); // browser client connects to ws server on 8081
@@ -36,6 +36,9 @@ export const FutureNotesProvider = ({ children }) => {
             const parsedToken = { time, duration, instrument, note };
             qRef.current.push(parsedToken);
           }
+        } else if (msg.address === "/oodScore") {
+          const score = dataView.getUint8(0);
+          oodScoreRef.current = score;
         }
       }
     };
@@ -52,7 +55,7 @@ export const FutureNotesProvider = ({ children }) => {
   }, []); // runs once on mount to connect to websocket server
 
   return (
-    <FutureNotesContext.Provider value={{ qRef, curTimeRef }}>
+    <FutureNotesContext.Provider value={{ qRef, curTimeRef, oodScoreRef }}>
       {children}
     </FutureNotesContext.Provider>
   );
