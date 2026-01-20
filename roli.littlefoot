@@ -1,0 +1,105 @@
+int pressedKeys[48];
+int keyAlpha[48];
+int keyRed[48];
+int keyBlue[48];
+
+void initialise()
+{
+    setUseDefaultKeyHandler(false, false);
+    for (int i = 0; i < 48; ++i)
+    {
+        pressedKeys[i] = 0;
+        keyAlpha[i] = 0;
+        keyRed[i] = 0;
+        keyBlue[i] = 0;
+    }
+}
+
+
+void repaint()
+{
+    clearDisplay();
+    for (int i = 0; i < 48; ++i)  // change number of octaves here
+    {
+        if (pressedKeys[i] == 1) // redraw pressedKeys
+        {
+//             blendRect (makeARGB (255, 0, 0, 255), i, 0, 1, 1);
+            blendRect(makeARGB(keyAlpha[i], keyRed[i], 0, keyBlue[i]), i, 0, 1, 1);
+
+        }
+    }
+}
+
+void keyStrike (int keyIndex, int unused, int velocity) 
+{
+    int clusterIndex = getHorizontalDistFromMaster()/2;
+    int octaveShift = clusterIndex * 12;
+    int x;
+    x = keyIndex % 48; // change number of octaves here
+    pressedKeys[x] = 1;
+    keyAlpha[x] = 255;
+    keyRed[x] = 0;
+    keyBlue[x] = 255;
+    
+//     blendRect (makeARGB (255, 0, 0, 255), x, 0, 1, 1);
+    sendMIDI(0x90, keyIndex + octaveShift + 48, velocity);
+}
+
+
+
+void keyLift (int keyIndex, int unused, int velocity) 
+{
+    int clusterIndex = getHorizontalDistFromMaster()/2;
+    int octaveShift = clusterIndex * 12;
+    int x;
+    x = keyIndex % 48;
+    pressedKeys[x] = 0;
+    keyAlpha[x] = 0;
+    keyRed[x] = 0;
+    keyBlue[x] = 0;
+//     blendRect (makeARGB (0, 0, 0, 0), x, 0, 1, 1);
+    sendMIDI(0x80, keyIndex + octaveShift + 48, velocity); // change octave here
+}
+
+
+void handleMIDI(int byte0, int byte1, int byte2)
+{
+    int midiNote = byte1;
+    // byte0 on or off, 144 or 128
+    // byte 2 velocity --> convert to alpha
+    int alpha = int(byte2 * 255 / 127);
+    int r = int(byte2 * 255 / 127);
+    int b = int((1-(byte2/127))*255);
+    
+    // Only respond if note is in this piano's range
+    int clusterIndex = getHorizontalDistFromMaster()/2;
+    int octaveShift = clusterIndex * 12;
+    int minNote = 48 + octaveShift;
+    int maxNote = 95 + octaveShift;
+    
+    if (midiNote >= minNote && midiNote <= maxNote)
+    {
+        int x = (midiNote - minNote) % 48;
+        
+        if (byte0 == 144 && byte2 > 0)
+        {
+             blendRect(makeARGB(alpha, r, 0, b), x, 0, 1, 1);
+ //             pressedKeys[x] = 1;
+//             keyAlpha[x] = alpha;
+//             keyRed[x] = r;
+//             keyBlue[x] = b;
+
+
+        }
+        else
+        {
+            blendRect(makeARGB(0, 0, 0, 0), x, 0, 1, 1);
+//             pressedKeys[x] = 0;
+//             keyAlpha[x] = 0;
+//             keyRed[x] = 0;
+//             keyBlue[x] = 0;
+
+
+        }
+    }
+}
