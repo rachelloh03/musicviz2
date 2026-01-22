@@ -4,7 +4,7 @@ import { PerspectiveTransform } from "react-perspective-transform";
 import { lightKey } from "./keyActions/lightKey";
 // import { displaySpeedometer } from "./displayOODScore/displaySpeedometer";
 import { displayProgressBar } from "./displayOODScore/displayProgressBar";
-import { useFutureNotes } from "./FutureNotesProvider/useFutureNotes";
+import { useOSCMessages } from "./OSCMessageProvider/useOSCMessages";
 import { TIME_THRESH, MAX_FUTURE_NOTES, ONE_SEC } from "./constants";
 import {
   getColor,
@@ -14,8 +14,8 @@ import {
 
 export default function App() {
   const canvasRef = useRef(null);
-  // const { qRef, curTimeRef, oodScoreRef } = useFutureNotes();
-  const { qRef, curTimeRef } = useFutureNotes();
+  // const { qRef, curTimeRef, oodScoreRef } = useOSCMessages();
+  const { qRef, curTimeRef } = useOSCMessages();
   const [rectOn, setRectOn] = useState(true);
   const [notesOn, setNotesOn] = useState(true);
   const [futureThresh, setFutureThresh] = useState(TIME_THRESH);

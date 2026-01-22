@@ -1,5 +1,6 @@
 export const displayProgressBar = (canvas, oodScore) => {
   if (!canvas || oodScore == null) return;
+  console.log(oodScore);
 
   const ctx = canvas.getContext("2d");
   if (!ctx) return;

@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
-import { FutureNotesContext } from "./FutureNotesContext";
+import { OSCMessageContext } from "./OSCMessageContext";
 
-export const FutureNotesProvider = ({ children }) => {
+export const OSCMessageProvider = ({ children }) => {
   const qRef = useRef([]);
   const curTimeRef = useRef(null);
   const oodScoreRef = useRef(null);
@@ -55,8 +55,8 @@ export const FutureNotesProvider = ({ children }) => {
   }, []); // runs once on mount to connect to websocket server
 
   return (
-    <FutureNotesContext.Provider value={{ qRef, curTimeRef, oodScoreRef }}>
+    <OSCMessageContext.Provider value={{ qRef, curTimeRef, oodScoreRef }}>
       {children}
-    </FutureNotesContext.Provider>
+    </OSCMessageContext.Provider>
   );
 };
