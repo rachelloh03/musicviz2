@@ -36,10 +36,11 @@ export const OSCMessageProvider = ({ children }) => {
             const parsedToken = { time, duration, instrument, note };
             qRef.current.push(parsedToken);
           }
-        } else if (msg.address === "/oodScore") {
-          const score = dataView.getUint8(0);
-          oodScoreRef.current = score;
         }
+        // } else if (msg.address === "/oodScore") {
+        //   const score = dataView.getUint8(0);
+        //   oodScoreRef.current = score;
+        // }
       }
     };
 

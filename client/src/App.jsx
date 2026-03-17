@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { PerspectiveTransform } from "react-perspective-transform";
 import { lightKey } from "./keyActions/lightKey";
 // import { displaySpeedometer } from "./displayOODScore/displaySpeedometer";
-import { displayProgressBar } from "./displayOODScore/displayProgressBar";
+// import { displayProgressBar } from "./displayOODScore/displayProgressBar";
 import { useOSCMessages } from "./OSCMessageProvider/useOSCMessages";
 import { TIME_THRESH, MAX_FUTURE_NOTES, ONE_SEC } from "./constants";
 import {
@@ -19,9 +19,11 @@ export default function App() {
   const [rectOn, setRectOn] = useState(true);
   const [notesOn, setNotesOn] = useState(true);
   const [futureThresh, setFutureThresh] = useState(TIME_THRESH);
+  const [onlyBass, setOnlyBass] = useState(true);
   const rectOnRef = useRef(rectOn);
   const notesOnRef = useRef(notesOn);
   const futureThreshRef = useRef(futureThresh);
+  const onlyBassRef = useRef(onlyBass);
   const futureThreshVisibleRef = useRef(false);
   const futureThreshTimeoutRef = useRef(null);
   const lastTriggerRef = useRef({});
@@ -39,6 +41,10 @@ export default function App() {
   useEffect(() => {
     futureThreshRef.current = futureThresh;
   }, [futureThresh]);
+
+  useEffect(() => {
+    onlyBassRef.current = onlyBass;
+  }, [onlyBass]);
 
   useEffect(() => {
     if (futureThreshTimeoutRef.current) {
@@ -86,11 +92,50 @@ export default function App() {
 
       // light future notes
       if (notesOnRef.current) {
-        qRef.current.forEach((token) => {
-          if (
+        const futureTokens = qRef.current.filter(
+          (token) =>
             token.time - futureThreshRef.current <= curTimeRef.current &&
-            curTimeRef.current <= token.time + token.duration
-          ) {
+            curTimeRef.current <= token.time + token.duration,
+        );
+
+        if (onlyBassRef.current) {
+          // only light the lowest future note
+          if (futureTokens.length > 0) {
+            const bassToken = futureTokens.reduce((min, t) =>
+              t.note < min.note ? t : min,
+            );
+            lightKey(
+              canvasRef.current,
+              bassToken.note,
+              curTimeRef.current,
+              bassToken.time,
+              getColor(
+                curTimeRef.current,
+                bassToken.time,
+                futureThreshRef.current,
+              ),
+              futureThreshRef.current,
+              roliRef.current,
+            );
+          }
+
+          // only light the lowest current note
+          if (activeMIDINotesRef.current.size > 0) {
+            const [bassNote, bassTime] = [
+              ...activeMIDINotesRef.current.entries(),
+            ].reduce((min, [midi, t]) => (midi < min[0] ? [midi, t] : min));
+            lightKey(
+              canvasRef.current,
+              bassNote,
+              curTimeRef.current,
+              bassTime,
+              getColor(curTimeRef.current, bassTime, futureThreshRef.current),
+              futureThreshRef.current,
+              roliRef.current,
+            );
+          }
+        } else {
+          futureTokens.forEach((token) => {
             lightKey(
               canvasRef.current,
               token.note,
@@ -100,20 +145,19 @@ export default function App() {
               futureThreshRef.current,
               roliRef.current,
             );
-          }
-        });
+          });
 
-        // light current notes
-        for (const [midi, noteTime] of activeMIDINotesRef.current.entries()) {
-          lightKey(
-            canvasRef.current,
-            midi,
-            curTimeRef.current,
-            noteTime,
-            getColor(curTimeRef.current, noteTime, futureThreshRef.current),
-            futureThreshRef.current,
-            roliRef.current,
-          );
+          for (const [midi, noteTime] of activeMIDINotesRef.current.entries()) {
+            lightKey(
+              canvasRef.current,
+              midi,
+              curTimeRef.current,
+              noteTime,
+              getColor(curTimeRef.current, noteTime, futureThreshRef.current),
+              futureThreshRef.current,
+              roliRef.current,
+            );
+          }
         }
       }
 
@@ -128,7 +172,7 @@ export default function App() {
       // show OOD score
       // displayOODScore(canvasRef.current, oodScoreRef.current);
       // displaySpeedometer(canvasRef.current, 80);
-      displayProgressBar(canvasRef.current, 80);
+      // displayProgressBar(canvasRef.current, 80);
 
       animId = requestAnimationFrame(animate);
     };
@@ -172,6 +216,9 @@ export default function App() {
     }
     if (pad === 3) {
       setNotesOn((prev) => !prev);
+    }
+    if (pad === 4) {
+      setOnlyBass((prev) => !prev);
     }
   };
 
