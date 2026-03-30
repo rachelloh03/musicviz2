@@ -95,7 +95,8 @@ export default function App() {
         const futureTokens = qRef.current.filter(
           (token) =>
             token.time - futureThreshRef.current <= curTimeRef.current &&
-            curTimeRef.current <= token.time + token.duration,
+            // curTimeRef.current <= token.time + token.duration,
+            curTimeRef.current < token.time,
         );
 
         if (onlyBassRef.current) {
@@ -147,19 +148,20 @@ export default function App() {
             );
           });
 
-          for (const [midi, noteTime] of activeMIDINotesRef.current.entries()) {
-            lightKey(
-              canvasRef.current,
-              midi,
-              curTimeRef.current,
-              noteTime,
-              getColor(curTimeRef.current, noteTime, futureThreshRef.current),
-              futureThreshRef.current,
-              roliRef.current,
-            );
-          }
+          // for (const [midi, noteTime] of activeMIDINotesRef.current.entries()) {
+          //   lightKey(
+          //     canvasRef.current,
+          //     midi,
+          //     curTimeRef.current,
+          //     noteTime,
+          //     getColor(curTimeRef.current, noteTime, futureThreshRef.current),
+          //     futureThreshRef.current,
+          //     roliRef.current,
+          //   );
+          // }
         }
       }
+      console.log(qRef.current);
 
       qRef.current = qRef.current.filter(
         (token) => curTimeRef.current <= token.time + token.duration,
