@@ -22,6 +22,19 @@ all_prompts = chick_prompts + keith_prompts + jordan_prompts + unmusical_prompts
 data_types = ["pitch", "dur", "time"]
 NUM_HEADS = 16
 base_path = "/scratch/rjloh/attention_weights"
+WINDOW_SIZE = 40
+
+# filepath = f"{base_path}/ask_me_now/ask_me_now8_time.ts"
+# with open(filepath) as f:
+#     raw = f.read()
+# json_str = raw[raw.index("["):raw.rindex("]")+1]
+# notes = json.loads(json_str)
+
+# for i, note in enumerate(notes):
+#     attn = np.array(note['attention'])
+#     if attn.sum() > 0:
+#         print(f"first non-zero note: index={i}, pitch={note['pitch']}, startTime={note['startTime']}, attention_sum={attn.sum():.6f}")
+#         break
 
 rows = []
 for prompt in all_prompts:
@@ -62,7 +75,16 @@ for prompt in all_prompts:
                 total_sum = sorted_attn.sum()
                 concentrations.append(top_k_sum / (total_sum + 1e-9))
 
-            if len(entropies) == 0:
+            # compute sliding window avg entropy for each position
+            window_avgs = []
+            for i in range(len(entropies)):
+                window = [e for e in entropies[max(0, i-WINDOW_SIZE):i+1] if e is not None]
+                if len(window) > 0:
+                    window_avgs.append(np.mean(window))
+
+            # if len(entropies) == 0:
+            #     continue
+            if len(window_avgs) == 0:
                 continue
 
             rows.append({
@@ -70,18 +92,22 @@ for prompt in all_prompts:
                 "data_type": data_type,
                 "head": head,
                 "label": label,
-                "avg_entropy": np.mean(entropies),
-                "std_entropy": np.std(entropies),
-                "avg_concentration": np.mean(concentrations),
-                "std_concentration": np.std(concentrations),
+                # "avg_entropy": np.mean(entropies),
+                # "std_entropy": np.std(entropies),
+                "avg_window_entropy": np.mean(window_avgs),
+                "min_window_entropy": np.min(window_avgs),
+                "max_window_entropy": np.max(window_avgs),
+                # "avg_concentration": np.mean(concentrations),
+                # "std_concentration": np.std(concentrations),
             })
 
 df = pd.DataFrame(rows)
-df.to_csv("arcs_summary.csv", index=False)
+# df.to_csv("arcs_summary.csv", index=False)
+df.to_csv("windowed_entropy_summary.csv", index=False)
 
 # df = pd.read_csv("arcs_summary.csv")
 
-# find most discriminative combos
+# find most discriminative combos where chick, keith, jordan, and unmusical are separate categories
 # results = []
 # for (head, dtype), group in df.groupby(["head", "data_type"]):
 #     chick_ent = group[group.label == "chick"]["avg_entropy"].mean()
@@ -129,44 +155,75 @@ df.to_csv("arcs_summary.csv", index=False)
 # print("\n=== TOP BY CONCENTRATION (correct order first, then separation) ===")
 # print(results_df.sort_values(["correct_order_con", "separation_con"], ascending=[False, False]).head(10).to_string())
 
-results = []
-for (head, dtype), group in df.groupby(["head", "data_type"]):
-    chick_keith_ent = group[group.label.isin(["chick", "keith"])]["avg_entropy"].mean()
-    jordan_ent = group[group.label == "jordan"]["avg_entropy"].mean()
-    unmusical_ent = group[group.label == "unmusical"]["avg_entropy"].mean()
 
-    chick_keith_con = group[group.label.isin(["chick", "keith"])]["avg_concentration"].mean()
-    jordan_con = group[group.label == "jordan"]["avg_concentration"].mean()
-    unmusical_con = group[group.label == "unmusical"]["avg_concentration"].mean()
+# find the most discriminative combos where chick and keith are combined into one category
+# results = []
+# for (head, dtype), group in df.groupby(["head", "data_type"]):
+#     chick_keith_ent = group[group.label.isin(["chick", "keith"])]["avg_entropy"].mean()
+#     jordan_ent = group[group.label == "jordan"]["avg_entropy"].mean()
+#     unmusical_ent = group[group.label == "unmusical"]["avg_entropy"].mean()
 
-    # entropy: chick_keith < jordan < unmusical (more musical = more focused = lower entropy)
-    correct_order_ent = chick_keith_ent < jordan_ent < unmusical_ent
-    separation_ent = unmusical_ent - chick_keith_ent
+#     chick_keith_con = group[group.label.isin(["chick", "keith"])]["avg_concentration"].mean()
+#     jordan_con = group[group.label == "jordan"]["avg_concentration"].mean()
+#     unmusical_con = group[group.label == "unmusical"]["avg_concentration"].mean()
 
-    # concentration: chick_keith > jordan > unmusical (more musical = higher concentration)
-    correct_order_con = chick_keith_con > jordan_con > unmusical_con
-    separation_con = chick_keith_con - unmusical_con
+#     # entropy: chick_keith < jordan < unmusical (more musical = more focused = lower entropy)
+#     correct_order_ent = chick_keith_ent < jordan_ent < unmusical_ent
+#     separation_ent = unmusical_ent - chick_keith_ent
 
-    results.append({
-        "head": head,
-        "data_type": dtype,
-        "chick_keith_ent": round(chick_keith_ent, 3),
-        "jordan_ent": round(jordan_ent, 3),
-        "unmusical_ent": round(unmusical_ent, 3),
-        "correct_order_ent": correct_order_ent,
-        "separation_ent": round(separation_ent, 3),
-        "chick_keith_con": round(chick_keith_con, 3),
-        "jordan_con": round(jordan_con, 3),
-        "unmusical_con": round(unmusical_con, 3),
-        "correct_order_con": correct_order_con,
-        "separation_con": round(separation_con, 3),
-    })
+#     # concentration: chick_keith > jordan > unmusical (more musical = higher concentration)
+#     correct_order_con = chick_keith_con > jordan_con > unmusical_con
+#     separation_con = chick_keith_con - unmusical_con
 
-results_df = pd.DataFrame(results)
-results_df.to_csv("discriminative_results.csv", index=False)
+#     results.append({
+#         "head": head,
+#         "data_type": dtype,
+#         "chick_keith_ent": round(chick_keith_ent, 3),
+#         "jordan_ent": round(jordan_ent, 3),
+#         "unmusical_ent": round(unmusical_ent, 3),
+#         "correct_order_ent": correct_order_ent,
+#         "separation_ent": round(separation_ent, 3),
+#         "chick_keith_con": round(chick_keith_con, 3),
+#         "jordan_con": round(jordan_con, 3),
+#         "unmusical_con": round(unmusical_con, 3),
+#         "correct_order_con": correct_order_con,
+#         "separation_con": round(separation_con, 3),
+#     })
+
+# results_df = pd.DataFrame(results)
+# results_df.to_csv("discriminative_results.csv", index=False)
 
 # print("=== TOP BY ENTROPY ===")
 # print(results_df.sort_values(["correct_order_ent", "separation_ent"], ascending=[False, False]).head(10).to_string())
 
 # print("\n=== TOP BY CONCENTRATION ===")
 # print(results_df.sort_values(["correct_order_con", "separation_con"], ascending=[False, False]).head(10).to_string())
+
+# find most discriminative combos where chick and keith are combined
+# and we us windowed entropy
+results = []
+for (head, dtype), group in df.groupby(["head", "data_type"]):
+    chick_keith_avg = group[group.label.isin(["chick", "keith"])]["avg_window_entropy"].mean()
+    jordan_avg = group[group.label == "jordan"]["avg_window_entropy"].mean()
+    unmusical_avg = group[group.label == "unmusical"]["avg_window_entropy"].mean()
+
+    correct_order = chick_keith_avg < jordan_avg < unmusical_avg
+    separation = unmusical_avg - chick_keith_avg
+    jordan_position = (jordan_avg - chick_keith_avg) / (unmusical_avg - chick_keith_avg + 1e-9) # where jordan sits on the spectrum between chick+keith and unmusical
+
+    results.append({
+        "head": head,
+        "data_type": dtype,
+        "chick_keith_avg": round(chick_keith_avg, 3),
+        "jordan_avg": round(jordan_avg, 3),
+        "unmusical_avg": round(unmusical_avg, 3),
+        "correct_order": correct_order,
+        "separation": round(separation, 3),
+        "jordan_position_0_to_1": round(jordan_position, 3),
+    })
+
+results_df = pd.DataFrame(results).sort_values(
+    ["correct_order", "separation"], ascending=[False, False]
+)
+print(results_df.to_string())
+results_df.to_csv("windowed_discriminative_results.csv", index=False)
