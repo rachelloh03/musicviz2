@@ -4,7 +4,7 @@ import { OSCMessageContext } from "./OSCMessageContext";
 export const OSCMessageProvider = ({ children }) => {
   const qRef = useRef([]);
   const curTimeRef = useRef(null);
-  const oodScoreRef = useRef(null);
+  const goodnessScoreRef = useRef(null);
 
   useEffect(() => {
     const ws = new WebSocket("ws://localhost:8081"); // browser client connects to ws server on 8081
@@ -36,11 +36,13 @@ export const OSCMessageProvider = ({ children }) => {
             const parsedToken = { time, duration, instrument, note };
             qRef.current.push(parsedToken);
           }
+        } else if (msg.address === "/score") {
+          const score = dataView.getFloat32(0, true);
+          console.log("score but actually noteEntropy for now: ", score);
+          goodnessScoreRef.current = score;
+        } else {
+          console.log(msg.address);
         }
-        // } else if (msg.address === "/oodScore") {
-        //   const score = dataView.getUint8(0);
-        //   oodScoreRef.current = score;
-        // }
       }
     };
 
@@ -56,7 +58,7 @@ export const OSCMessageProvider = ({ children }) => {
   }, []); // runs once on mount to connect to websocket server
 
   return (
-    <OSCMessageContext.Provider value={{ qRef, curTimeRef, oodScoreRef }}>
+    <OSCMessageContext.Provider value={{ qRef, curTimeRef, goodnessScoreRef }}>
       {children}
     </OSCMessageContext.Provider>
   );

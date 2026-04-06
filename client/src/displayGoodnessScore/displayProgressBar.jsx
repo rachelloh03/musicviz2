@@ -1,14 +1,12 @@
-export const displayProgressBar = (canvas, oodScore) => {
-  if (!canvas || oodScore == null) return;
-  console.log(oodScore);
-
+export const displayProgressBar = (canvas, goodnessScore) => {
+  if (!canvas || goodnessScore == null) return;
   const ctx = canvas.getContext("2d");
   if (!ctx) return;
 
   const width = canvas.width;
   const height = canvas.height;
 
-  const idScore = 100 - oodScore; // more intuitive to show how in-distribution the prompt is
+  const idScore = goodnessScore * 100; // more intuitive to show how in-distribution the prompt is
 
   // Bar parameters
   const barHeight = height * 0.1;

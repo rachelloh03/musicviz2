@@ -1,7 +1,8 @@
 import { RADIUS } from "../constants";
 
-export const displaySpeedometer = (canvas, oodScore) => {
-  if (!canvas || oodScore == null) return;
+export const displaySpeedometer = (canvas, goodnessScore) => {
+  if (!canvas || goodnessScore == null) return;
+  console.log("goodnessScore: ", goodnessScore);
 
   const ctx = canvas.getContext("2d");
   if (!ctx) return;
@@ -24,7 +25,7 @@ export const displaySpeedometer = (canvas, oodScore) => {
   ctx.arc(centerX, centerY, RADIUS, Math.PI, 2 * Math.PI);
   ctx.stroke();
 
-  const idScore = 100 - oodScore; // more intuitive to show how in-distribution the prompt is
+  const idScore = goodnessScore * 100; // more intuitive to show how in-distribution the prompt is
 
   // Draw colored arc proportional to score
   ctx.beginPath();

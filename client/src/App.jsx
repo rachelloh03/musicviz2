@@ -2,8 +2,8 @@ import "./App.css";
 import { useEffect, useRef, useState } from "react";
 import { PerspectiveTransform } from "react-perspective-transform";
 import { lightKey } from "./keyActions/lightKey";
-// import { displaySpeedometer } from "./displayOODScore/displaySpeedometer";
-// import { displayProgressBar } from "./displayOODScore/displayProgressBar";
+// import { displaySpeedometer } from "./displayGoodnessScore/displaySpeedometer";
+import { displayProgressBar } from "./displayGoodnessScore/displayProgressBar";
 import { useOSCMessages } from "./OSCMessageProvider/useOSCMessages";
 import { TIME_THRESH, MAX_FUTURE_NOTES, ONE_SEC } from "./constants";
 import {
@@ -14,12 +14,12 @@ import {
 
 export default function App() {
   const canvasRef = useRef(null);
-  // const { qRef, curTimeRef, oodScoreRef } = useOSCMessages();
-  const { qRef, curTimeRef } = useOSCMessages();
+  const { qRef, curTimeRef, goodnessScoreRef } = useOSCMessages();
+  // const { qRef, curTimeRef } = useOSCMessages();
   const [rectOn, setRectOn] = useState(true);
   const [notesOn, setNotesOn] = useState(true);
   const [futureThresh, setFutureThresh] = useState(TIME_THRESH);
-  const [onlyBass, setOnlyBass] = useState(true);
+  const [onlyBass, setOnlyBass] = useState(false);
   const rectOnRef = useRef(rectOn);
   const notesOnRef = useRef(notesOn);
   const futureThreshRef = useRef(futureThresh);
@@ -95,8 +95,8 @@ export default function App() {
         const futureTokens = qRef.current.filter(
           (token) =>
             token.time - futureThreshRef.current <= curTimeRef.current &&
-            // curTimeRef.current <= token.time + token.duration,
-            curTimeRef.current < token.time,
+            curTimeRef.current <= token.time + token.duration,
+          // curTimeRef.current < token.time, // uncomment this line and comment above line if do not want to see note lit when playing
         );
 
         if (onlyBassRef.current) {
@@ -148,20 +148,19 @@ export default function App() {
             );
           });
 
-          // for (const [midi, noteTime] of activeMIDINotesRef.current.entries()) {
-          //   lightKey(
-          //     canvasRef.current,
-          //     midi,
-          //     curTimeRef.current,
-          //     noteTime,
-          //     getColor(curTimeRef.current, noteTime, futureThreshRef.current),
-          //     futureThreshRef.current,
-          //     roliRef.current,
-          //   );
-          // }
+          for (const [midi, noteTime] of activeMIDINotesRef.current.entries()) {
+            lightKey(
+              canvasRef.current,
+              midi,
+              curTimeRef.current,
+              noteTime,
+              getColor(curTimeRef.current, noteTime, futureThreshRef.current),
+              futureThreshRef.current,
+              roliRef.current,
+            );
+          }
         }
       }
-      console.log(qRef.current);
 
       qRef.current = qRef.current.filter(
         (token) => curTimeRef.current <= token.time + token.duration,
@@ -171,10 +170,13 @@ export default function App() {
         qRef.current.splice(0, qRef.current.length - MAX_FUTURE_NOTES);
       }
 
-      // show OOD score
-      // displayOODScore(canvasRef.current, oodScoreRef.current);
-      // displaySpeedometer(canvasRef.current, 80);
-      // displayProgressBar(canvasRef.current, 80);
+      // show goodness score
+      // displaySpeedometer(canvasRef.current, goodnessScoreRef.current);
+      if (goodnessScoreRef.current >= 0.0) {
+        if (goodnessScoreRef.current || goodnessScoreRef.current == 0.0) {
+          displayProgressBar(canvasRef.current, goodnessScoreRef.current);
+        }
+      }
 
       animId = requestAnimationFrame(animate);
     };

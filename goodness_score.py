@@ -6,17 +6,18 @@ from scipy.stats import entropy
 chick_prompts = ["ask_me_now", "blue_monk", "brazil", "but_beautiful", 
               "dusk_in_sandi", "how_deep_is_the_ocean", "it_could_happen_to_you", 
               "monks_dream", "oblivion", "round_midnight"]
-keith_prompts = ["answer_me", "part_i_royal_festival_hall", 'part_ii_royal_festival_hall',
-                 "part_iii_royal_festival_hall", "part_iv_royal_festival_hall",
-                 "part_i_salle_pleyel", "part_ii_salle_pleyel", "part_iii_salle_pleyel",
+keith_prompts = ["answer_me", "pt_i_royal", 'pt_ii_royal',
+                 "pt_iii_royal", "pt_iv_royal",
+                 "pt_i_salle", "pt_ii_salle", "pt_iii_salle",
                  "part_vii", "part_viii"]
-jordan_prompts = ["jordan0", "jordan1", "jordan2", "jordan3", "jordan4",
-                  "jordan5", "jordan6", "jordan7", "jordan8", "jordan9"]
-unmusical_prompts = ["extreme_register_0", "extreme_register_1", 
-                     "random_0", "random_1",
-                     "single_note_0", "single_note_1",
+jordan_prompts = ["jordan_trading_0", "jordan_trading_1", "jordan_trading_2", "jordan_trading_3", "jordan_trading_4",
+                  "jordan_trading_5", "jordan_trading_6", "jordan_trading_7", "jordan_trading_9", "jordan_trading_11", 
+                  "jordan_trading_12", "jordan_trading_13", "jordan_trading_14"]
+unmusical_prompts = ["single_note_0", "single_note_1",
                      "smash_0", "smash_1",
-                     "two_note_0", "two_note_1"]
+                     "smash_2", "smash_3",
+                     "smash_4", "smash_5",
+                     "smash_6", "two_note_0"]
 all_prompts = chick_prompts + keith_prompts + jordan_prompts + unmusical_prompts
 
 data_types = ["pitch", "dur", "time"]
@@ -200,26 +201,26 @@ df.to_csv("windowed_entropy_summary.csv", index=False)
 # print(results_df.sort_values(["correct_order_con", "separation_con"], ascending=[False, False]).head(10).to_string())
 
 # find most discriminative combos where chick and keith are combined
-# and we us windowed entropy
+# and we use windowed entropy
 results = []
 for (head, dtype), group in df.groupby(["head", "data_type"]):
     chick_keith_avg = group[group.label.isin(["chick", "keith"])]["avg_window_entropy"].mean()
     jordan_avg = group[group.label == "jordan"]["avg_window_entropy"].mean()
     unmusical_avg = group[group.label == "unmusical"]["avg_window_entropy"].mean()
 
-    correct_order = chick_keith_avg < jordan_avg < unmusical_avg
-    separation = unmusical_avg - chick_keith_avg
-    jordan_position = (jordan_avg - chick_keith_avg) / (unmusical_avg - chick_keith_avg + 1e-9) # where jordan sits on the spectrum between chick+keith and unmusical
+    correct_order =  jordan_avg < chick_keith_avg < unmusical_avg
+    separation = unmusical_avg - jordan_avg
+    chick_keith_position = (chick_keith_avg - jordan_avg) / (unmusical_avg - jordan_avg + 1e-9) # where chick_keith sits on the spectrum between jordan and unmusical
 
     results.append({
         "head": head,
         "data_type": dtype,
-        "chick_keith_avg": round(chick_keith_avg, 3),
         "jordan_avg": round(jordan_avg, 3),
+        "chick_keith_avg": round(chick_keith_avg, 3),
         "unmusical_avg": round(unmusical_avg, 3),
         "correct_order": correct_order,
         "separation": round(separation, 3),
-        "jordan_position_0_to_1": round(jordan_position, 3),
+        "chick_keith_position_0_to_1": round(chick_keith_position, 3),
     })
 
 results_df = pd.DataFrame(results).sort_values(

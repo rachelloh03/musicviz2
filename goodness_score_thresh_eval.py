@@ -1,9 +1,9 @@
 import pandas as pd
 
-GOOD_ENTROPY_THRESH = 4.693
-BAD_ENTROPY_THRESH = 5.147
+GOOD_ENTROPY_THRESH = 4.143
+BAD_ENTROPY_THRESH = 4.246
 
-df = pd.read_csv("prompt_avg_window_entropy_time_head8.csv")
+df = pd.read_csv("three_token_entropy.csv") # each prompt (there are 43) has its corresponding entropy (avg of pitch, dur, time entropies)
 
 def predict_label(entropy):
     if entropy <= GOOD_ENTROPY_THRESH:
@@ -24,13 +24,13 @@ def true_label(artist):
 def is_correct(predicted, artist):
     true = true_label(artist)
     if true == "chick_keith":
-        return predicted in ["good", "in-between"]  # either is acceptable
+        return predicted in ["in-between"]  # either is acceptable
     elif true == "jordan":
-        return predicted in ["good", "in-between"]  # either is acceptable
+        return predicted in ["good"]  # either is acceptable
     elif true == "unmusical":
         return predicted == "bad"
 
-df["predicted"] = df["avg_window_entropy"].apply(predict_label)
+df["predicted"] = df["avg_entropy"].apply(predict_label)
 df["correct"] = df.apply(lambda row: is_correct(row["predicted"], row["artist"]), axis=1)
 
 print(f"\n=== ACCURACY ===")
