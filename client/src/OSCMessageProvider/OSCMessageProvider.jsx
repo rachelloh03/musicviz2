@@ -4,7 +4,7 @@ import { OSCMessageContext } from "./OSCMessageContext";
 export const OSCMessageProvider = ({ children }) => {
   const qRef = useRef([]);
   const curTimeRef = useRef(null);
-  const goodnessScoreRef = useRef(null);
+  const confidenceScoreRef = useRef(null);
 
   useEffect(() => {
     const ws = new WebSocket("ws://localhost:8081"); // browser client connects to ws server on 8081
@@ -26,20 +26,19 @@ export const OSCMessageProvider = ({ children }) => {
           const time = dataView.getUint32(0, true);
           const duration = dataView.getUint16(4, true);
           const instrument = dataView.getUint8(6);
-          const note = dataView.getUint8(7);
+          const pitch = dataView.getUint8(7);
 
-          if (note === 130) {
+          if (pitch === 130) {
             // 130 is ClearQueue
             qRef.current = [];
-          } else if (note !== 129) {
+          } else if (pitch !== 129) {
             // 129 is BarSeparator
-            const parsedToken = { time, duration, instrument, note };
+            const parsedToken = { time, duration, instrument, pitch };
             qRef.current.push(parsedToken);
           }
         } else if (msg.address === "/score") {
           const score = dataView.getFloat32(0, true);
-          console.log("score but actually noteEntropy for now: ", score);
-          goodnessScoreRef.current = score;
+          confidenceScoreRef.current = score;
         } else {
           console.log(msg.address);
         }
@@ -58,7 +57,9 @@ export const OSCMessageProvider = ({ children }) => {
   }, []); // runs once on mount to connect to websocket server
 
   return (
-    <OSCMessageContext.Provider value={{ qRef, curTimeRef, goodnessScoreRef }}>
+    <OSCMessageContext.Provider
+      value={{ qRef, curTimeRef, confidenceScoreRef }}
+    >
       {children}
     </OSCMessageContext.Provider>
   );

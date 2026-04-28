@@ -1,12 +1,12 @@
-export const displayProgressBar = (canvas, goodnessScore) => {
-  if (!canvas || goodnessScore == null) return;
+export const displayProgressBar = (canvas, confidenceScore) => {
+  if (!canvas || confidenceScore == null) return;
   const ctx = canvas.getContext("2d");
   if (!ctx) return;
 
   const width = canvas.width;
   const height = canvas.height;
 
-  const idScore = goodnessScore * 100; // more intuitive to show how in-distribution the prompt is
+  const score = confidenceScore * 100; // more intuitive to show how in-distribution the prompt is
 
   // Bar parameters
   const barHeight = height * 0.1;
@@ -27,11 +27,11 @@ export const displayProgressBar = (canvas, goodnessScore) => {
   ctx.fillRect(barX, barY, barWidth, barHeight);
 
   // Draw foreground bar proportional to score
-  const filledWidth = (idScore / 100) * barWidth;
+  const filledWidth = (score / 100) * barWidth;
 
   let fillColor;
-  if (idScore < 50) fillColor = "#f00";
-  else if (idScore < 75) fillColor = "#ff0";
+  if (score < 50) fillColor = "#f00";
+  else if (score < 75) fillColor = "#ff0";
   else fillColor = "#0f0";
 
   ctx.fillStyle = fillColor;
@@ -42,7 +42,7 @@ export const displayProgressBar = (canvas, goodnessScore) => {
   ctx.fillStyle = "#000";
   ctx.textAlign = "center";
   ctx.textBaseline = "bottom";
-  ctx.fillText(`${idScore.toFixed(0)}`, width / 2, barY + 35); // slightly above the bar
+  ctx.fillText(`${score.toFixed(0)}`, width / 2, barY + 35); // slightly above the bar
 
   ctx.restore();
 };

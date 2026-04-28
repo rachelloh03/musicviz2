@@ -10,12 +10,12 @@ import {
 
 export const lightKey = (
   canvas,
-  midi,
+  pitch,
   curTime,
   startTime,
   color,
   futureThresh,
-  roli = null
+  roli = null,
 ) => {
   if (!canvas) {
     return;
@@ -25,7 +25,7 @@ export const lightKey = (
     return;
   }
 
-  const isBlackKey = blackKeys.includes(midi);
+  const isBlackKey = blackKeys.includes(pitch);
   const rgba = color;
   const height = getHeight(curTime, startTime, isBlackKey, futureThresh);
   const width = getWidth(curTime, startTime, isBlackKey);
@@ -34,7 +34,7 @@ export const lightKey = (
   ctx.fillStyle = rgba;
 
   const y = isBlackKey ? blackKeyY : whiteKeyY;
-  const x = getX(canvas, midi, isBlackKey, curTime, startTime);
+  const x = getX(canvas, pitch, isBlackKey, curTime, startTime);
 
   // simple rectangle
   ctx.beginPath();
@@ -46,6 +46,6 @@ export const lightKey = (
 
   // roli
   if (roli) {
-    roli.send([0x90, midi, Math.floor(alpha * 127)]); // send alpha as velocity
+    roli.send([0x90, pitch, Math.floor(alpha * 127)]); // send alpha as velocity
   }
 };

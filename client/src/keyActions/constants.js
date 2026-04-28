@@ -19,7 +19,7 @@ for (let j = 0; j < baseBlackKeys.length; j++) {
 export const blackKeys = blackKeysArr.sort();
 
 export const whiteKeys = Array.from({ length: 128 }, (_, i) => i).filter(
-  (num) => !blackKeys.includes(num)
+  (num) => !blackKeys.includes(num),
 );
 
 export const playingNoteWidth = 3;
@@ -33,24 +33,24 @@ export const blackKeyY = 258;
 export const whiteKeyY = 258;
 export const xOffset = -216;
 
-export function getWhiteX(midi) {
-  const whiteX = whiteKeys.indexOf(midi) * whiteKeyWidth;
+export function getWhiteX(pitch) {
+  const whiteX = whiteKeys.indexOf(pitch) * whiteKeyWidth;
   // console.log(
   //   "set xOffset =",
-  //   400 - whiteKeys.indexOf(midi) * whiteKeyWidth + 2
+  //   400 - whiteKeys.indexOf(pitch) * whiteKeyWidth + 2
   // );
   return whiteX + xOffset;
 }
 
-export function getX(canvas, midi, isBlackKey, curTime, startTime) {
+export function getX(canvas, pitch, isBlackKey, curTime, startTime) {
   // 60 = C4
   let x;
   const curWidth = getWidth(curTime, startTime, isBlackKey);
   const keyWidth = isBlackKey ? blackKeyWidth : whiteKeyWidth;
   if (!isBlackKey) {
-    x = getWhiteX(midi);
+    x = getWhiteX(pitch);
   } else {
-    const closestWhiteKey = whiteKeys.filter((n) => n < midi).pop();
+    const closestWhiteKey = whiteKeys.filter((n) => n < pitch).pop();
     x = getWhiteX(closestWhiteKey) + 0.5 * whiteKeyWidth;
   }
   const delta = (keyWidth - curWidth) / 2;
@@ -63,7 +63,7 @@ export function getAlpha(curTime, startTime, futureThresh) {
   const alpha = Math.min(
     (1.0 / (futureThresh + 1e-6)) * curTime +
       (1.0 - startTime / (futureThresh + 1e-6)),
-    1.0
+    1.0,
   );
   return alpha; // linear alpha, clip at 1.0
 }
@@ -71,7 +71,7 @@ export function getAlpha(curTime, startTime, futureThresh) {
 export function getColor(curTime, startTime, futureThresh) {
   const timePercentChange = Math.min(
     1.0,
-    Math.max(0.0, 1 - (startTime - curTime) / (futureThresh + 1e-6))
+    Math.max(0.0, 1 - (startTime - curTime) / (futureThresh + 1e-6)),
   );
   // blue to red --> as curTime gets closer to startTime
   const r = parseInt(timePercentChange * 255);
@@ -80,7 +80,7 @@ export function getColor(curTime, startTime, futureThresh) {
   const rgba = `rgba(${r}, ${g}, ${b},${getAlpha(
     curTime,
     startTime,
-    futureThresh
+    futureThresh,
   )})`;
   return rgba;
 }

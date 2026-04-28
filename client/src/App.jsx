@@ -2,8 +2,8 @@ import "./App.css";
 import { useEffect, useRef, useState } from "react";
 import { PerspectiveTransform } from "react-perspective-transform";
 import { lightKey } from "./keyActions/lightKey";
-// import { displaySpeedometer } from "./displayGoodnessScore/displaySpeedometer";
-import { displayProgressBar } from "./displayGoodnessScore/displayProgressBar";
+// import { displaySpeedometer } from "./displayConfidenceScore/displaySpeedometer";
+import { displayProgressBar } from "./displayConfidenceScore/displayProgressBar";
 import { useOSCMessages } from "./OSCMessageProvider/useOSCMessages";
 import { TIME_THRESH, MAX_FUTURE_NOTES, ONE_SEC } from "./constants";
 import {
@@ -14,7 +14,7 @@ import {
 
 export default function App() {
   const canvasRef = useRef(null);
-  const { qRef, curTimeRef, goodnessScoreRef } = useOSCMessages();
+  const { qRef, curTimeRef, confidenceScoreRef } = useOSCMessages();
   // const { qRef, curTimeRef } = useOSCMessages();
   const [rectOn, setRectOn] = useState(true);
   const [notesOn, setNotesOn] = useState(true);
@@ -103,11 +103,11 @@ export default function App() {
           // only light the lowest future note
           if (futureTokens.length > 0) {
             const bassToken = futureTokens.reduce((min, t) =>
-              t.note < min.note ? t : min,
+              t.pitch < min.pitch ? t : min,
             );
             lightKey(
               canvasRef.current,
-              bassToken.note,
+              bassToken.pitch,
               curTimeRef.current,
               bassToken.time,
               getColor(
@@ -124,7 +124,7 @@ export default function App() {
           if (activeMIDINotesRef.current.size > 0) {
             const [bassNote, bassTime] = [
               ...activeMIDINotesRef.current.entries(),
-            ].reduce((min, [midi, t]) => (midi < min[0] ? [midi, t] : min));
+            ].reduce((min, [pitch, t]) => (pitch < min[0] ? [pitch, t] : min));
             lightKey(
               canvasRef.current,
               bassNote,
@@ -139,7 +139,7 @@ export default function App() {
           futureTokens.forEach((token) => {
             lightKey(
               canvasRef.current,
-              token.note,
+              token.pitch,
               curTimeRef.current,
               token.time,
               getColor(curTimeRef.current, token.time, futureThreshRef.current),
@@ -148,10 +148,13 @@ export default function App() {
             );
           });
 
-          for (const [midi, noteTime] of activeMIDINotesRef.current.entries()) {
+          for (const [
+            pitch,
+            noteTime,
+          ] of activeMIDINotesRef.current.entries()) {
             lightKey(
               canvasRef.current,
-              midi,
+              pitch,
               curTimeRef.current,
               noteTime,
               getColor(curTimeRef.current, noteTime, futureThreshRef.current),
@@ -170,11 +173,11 @@ export default function App() {
         qRef.current.splice(0, qRef.current.length - MAX_FUTURE_NOTES);
       }
 
-      // show goodness score
-      // displaySpeedometer(canvasRef.current, goodnessScoreRef.current);
-      if (goodnessScoreRef.current >= 0.0) {
-        if (goodnessScoreRef.current || goodnessScoreRef.current == 0.0) {
-          displayProgressBar(canvasRef.current, goodnessScoreRef.current);
+      // show confidence score
+      // displaySpeedometer(canvasRef.current, confidenceScoreRef.current);
+      if (confidenceScoreRef.current >= 0.0) {
+        if (confidenceScoreRef.current || confidenceScoreRef.current == 0.0) {
+          displayProgressBar(canvasRef.current, confidenceScoreRef.current);
         }
       }
 
@@ -188,12 +191,12 @@ export default function App() {
   }, []);
 
   const handleCurrMIDI = () => (event) => {
-    const [status, midi, velocity] = event.data;
+    const [status, pitch, velocity] = event.data;
 
     if (status === 144 && velocity > 0) {
-      activeMIDINotesRef.current.set(midi, curTimeRef.current);
+      activeMIDINotesRef.current.set(pitch, curTimeRef.current);
     } else if (status === 128 || (status === 144 && velocity === 0)) {
-      activeMIDINotesRef.current.delete(midi);
+      activeMIDINotesRef.current.delete(pitch);
     }
   };
 
