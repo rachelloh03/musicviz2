@@ -24,21 +24,17 @@ export const whiteKeys = Array.from({ length: 128 }, (_, i) => i).filter(
 
 export const playingNoteWidth = 3;
 export const incNoteWidthRate = 75;
-export const blackKeyWidth = 7;
-export const whiteKeyWidth = 11; //11
-export const blackKeyHeight = 155;
-export const whiteKeyHeight = 235;
+export const blackKeyWidth = 4.8;
+export const whiteKeyWidth = 7.8;
+export const blackKeyHeight = 170;
+export const whiteKeyHeight = 260;
 
 export const blackKeyY = 258;
 export const whiteKeyY = 258;
-export const xOffset = -216;
+export const xOffset = -85.5; //-216
 
 export function getWhiteX(pitch) {
   const whiteX = whiteKeys.indexOf(pitch) * whiteKeyWidth;
-  // console.log(
-  //   "set xOffset =",
-  //   400 - whiteKeys.indexOf(pitch) * whiteKeyWidth + 2
-  // );
   return whiteX + xOffset;
 }
 

@@ -76,6 +76,7 @@ export default function App() {
         return;
       }
       ctx.clearRect(0, 0, canvas.width, canvas.height);
+
       if (futureThreshVisibleRef.current) {
         showFutureThresh(canvas, futureThreshRef.current);
       }
