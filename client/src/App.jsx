@@ -12,7 +12,32 @@ import {
   showFutureThresh,
 } from "./keyActions/constants";
 
+const PERSPECTIVE_KEY = "keyboard-transform-coords";
+
+const defaultPoints = {
+  topLeft: { x: 0, y: 0 },
+  topRight: { x: 400, y: 0 },
+  bottomRight: { x: 400, y: 300 },
+  bottomLeft: { x: 0, y: 300 },
+};
 export default function App() {
+  const [points, setPoints] = useState(() => {
+    const saved = localStorage.getItem(PERSPECTIVE_KEY);
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch (e) {
+        console.error("Error loading points", e);
+      }
+    }
+    return defaultPoints;
+  });
+
+  const handlePointsChange = (newPoints) => {
+    setPoints(newPoints);
+    localStorage.setItem(PERSPECTIVE_KEY, JSON.stringify(newPoints));
+  };
+
   const canvasRef = useRef(null);
   const { qRef, curTimeRef, confidenceScoreRef } = useOSCMessages();
   // const { qRef, curTimeRef } = useOSCMessages();
@@ -29,6 +54,11 @@ export default function App() {
   const lastTriggerRef = useRef({});
   const activeMIDINotesRef = useRef(new Map());
   const roliRef = useRef(null);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     rectOnRef.current = rectOn;
@@ -285,7 +315,11 @@ export default function App() {
           height: 300,
         }}
       >
-        <PerspectiveTransform>
+        <PerspectiveTransform
+          key={mounted ? "mounted" : "unmounted"}
+          points={points}
+          onPointsChange={handlePointsChange}
+        >
           <img src="/keyboard.JPG" alt="keyboard" style={{ width: "100%" }} />
           <canvas
             ref={canvasRef}
