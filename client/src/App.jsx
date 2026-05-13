@@ -219,7 +219,7 @@ export default function App() {
       cancelAnimationFrame(animId);
     };
     //eslint-disable-next-line
-  }, []);
+  }, [mounted]);
 
   const handleCurrMIDI = () => (event) => {
     const [status, pitch, velocity] = event.data;
